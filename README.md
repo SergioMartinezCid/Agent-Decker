@@ -42,7 +42,7 @@ Add `?dev` to the URL to get **Test scenarios** in the in-game menu. These are p
 | `src/ui/` | React UI. `Desktop.tsx` is the desktop layout (side inspector, compact landscape mode); `Phone.tsx` is the phone layout (vertical conveyor). |
 | `src/i18n/`, `src/content/` | Strings and rules text in English and Spanish |
 | `src/audio/sfx.ts` | Synthesized sound effects |
-| `scripts/` | Python scripts that cut card images, icons and diagrams out of the PDFs (`npm run assets`, needs `pymupdf` and `Pillow`) |
+| `scripts/` | Python scripts that cut card images and diagrams out of the PDFs and draw the app icons (`npm run assets`, needs `pymupdf` and `Pillow`) |
 | `design/layout-lab/` | The layout mockups the UI was chosen from |
 | `docs/rulings.md` | Rule clarifications and their sources |
 

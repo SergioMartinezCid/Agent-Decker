@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "assets": "python3 scripts/extract_cards.py source/AgentDecker_cards_full_art.pdf public/cards 240 480 && python3 scripts/make_icons.py source/AgentDecker_cards_full_art.pdf public && python3 scripts/extract_rules_art.py source/AgentDecker_rules_full_art.pdf public/rules"
+    "assets": "python3 scripts/extract_cards.py source/AgentDecker_cards_full_art.pdf public/cards 240 480 && python3 scripts/make_icons.py public && python3 scripts/extract_rules_art.py source/AgentDecker_rules_full_art.pdf public/rules"
   },
   "dependencies": {
     "react": "19.1.1",
