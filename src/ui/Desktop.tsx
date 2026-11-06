@@ -33,7 +33,7 @@ export function DesktopLayout({ compact }: { compact: boolean }) {
           <span className="lbl">{t('hud.equipped')}</span>
           <div className="eqs">{game.equip.length ? <EquipChips /> : <span className="muted">–</span>}</div>
         </section>
-        <section className="side-sec piles-row">
+        <section className="side-sec pile-list">
           <Piles show={['deck', 'discard', 'play', 'removed']} />
         </section>
       </aside>

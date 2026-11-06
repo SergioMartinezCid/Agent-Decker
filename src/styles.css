@@ -162,9 +162,16 @@ a { color: var(--fg); }
 .desk .side { padding: 14px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid var(--rule); background: #050b1155; overflow: auto; min-height: 0; }
 .desk .mission-card { border: 0; padding: 0; background: transparent; width: 140px; align-self: center; }
 .desk .mission-card img { width: 100%; border-radius: 6%; box-shadow: 0 8px 22px #000a; display: block; }
+/* Shorter screens: a smaller mission card keeps the sidebar from scrolling. */
+@media (max-height: 900px) {
+  .desk .side { gap: 12px; }
+  .desk .mission-card { width: 108px; }
+}
 .side-sec { display: grid; gap: 6px; }
 .eqs { display: flex; flex-wrap: wrap; gap: 6px; }
-.piles-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.pile-list { gap: 4px; }
+.pile-list .pile { flex-direction: row; justify-content: space-between; align-items: center; gap: 10px; width: 100%; min-width: 0; padding: 3px 10px; }
+.pile-list .pile span { font-size: 12px; }
 .desk .center { display: flex; flex-direction: column; padding: 12px 20px 14px; gap: 10px; min-width: 0; min-height: 0; overflow: hidden; }
 .line-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .linkish { border: 0; background: transparent; padding: 0; text-decoration: underline dotted; text-underline-offset: 3px; }
@@ -186,6 +193,7 @@ a { color: var(--fg); }
 }
 .compact .tb { height: 42px; }
 .compact .side { padding: 8px; gap: 8px; }
+.compact .pile-list .pile { padding: 2px 8px; }
 .compact .mission-card { width: 84px; }
 .compact .center { padding: 6px 12px 8px; gap: 6px; }
 .compact .lrow { gap: 8px; padding: 6px 0 10px; }
