@@ -52,6 +52,8 @@ export interface GameUI {
   canUndo: boolean;
   openMenu: () => void;
   openRules: () => void;
+  /** Show a card full screen. */
+  zoom: (id: string) => void;
 }
 
 const Ctx = createContext<GameUI | null>(null);

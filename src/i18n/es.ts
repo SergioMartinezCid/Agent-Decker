@@ -98,6 +98,7 @@ export const es: Dict = {
   },
   insp: {
     position: 'Posición {n} de la fila',
+    zoom: 'Ver la carta a pantalla completa',
     cost: 'Coste',
     alarm: 'Alarma',
     watchtower: '+{n} por la Torre de vigilancia',

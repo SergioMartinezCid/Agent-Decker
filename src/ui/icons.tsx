@@ -83,7 +83,8 @@ export type IconName =
   | 'download'
   | 'upload'
   | 'flask'
-  | 'chevron';
+  | 'chevron'
+  | 'zoom';
 
 const UI_PATHS: Record<IconName, string> = {
   menu: 'M4 6h16M4 12h16M4 18h16',
@@ -104,6 +105,7 @@ const UI_PATHS: Record<IconName, string> = {
   upload: 'M12 15V4M7 9l5-5 5 5M4 20h16',
   flask: 'M9 3h6M10 3v6l-5.2 9.2A1.9 1.9 0 0 0 6.5 21h11a1.9 1.9 0 0 0 1.7-2.8L14 9V3M7.2 15h9.6',
   chevron: 'M9 5l7 7-7 7',
+  zoom: 'M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20.5 20.5l-5-5M10.5 7.5v6M7.5 10.5h6',
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

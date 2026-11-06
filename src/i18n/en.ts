@@ -110,6 +110,7 @@ export const en = {
   },
   insp: {
     position: 'Line position {n}',
+    zoom: 'Show the card full screen',
     cost: 'Cost',
     alarm: 'Alarm',
     watchtower: '+{n} from Watchtower',

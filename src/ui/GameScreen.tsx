@@ -5,7 +5,7 @@ import type { Action } from '../engine/types';
 import { useI18n } from '../i18n';
 import { dispatch, setOverlay, undo, useApp } from '../state/store';
 import { DesktopLayout } from './Desktop';
-import { ChoiceDialog, PendingDialog, PhaseModal } from './Dialogs';
+import { CardZoom, ChoiceDialog, PendingDialog, PhaseModal } from './Dialogs';
 import { GameProvider, sameTarget, type ChoiceSpec, type GameUI, type Target } from './game';
 import { useLayoutMode } from './hooks';
 import { PhoneLayout } from './Phone';
@@ -19,6 +19,7 @@ export function GameScreen() {
   const [target, setTarget] = useState<Target | null>(null);
   const [hovered, setHovered] = useState<Target | null>(null);
   const [choice, setChoice] = useState<ChoiceSpec | null>(null);
+  const [zoomed, setZoomed] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const frame = anim ? anim.frames[anim.i] : null;
@@ -164,6 +165,7 @@ export function GameScreen() {
     canUndo: saved.undo.length > 0 && !anim,
     openMenu: () => setOverlay('menu'),
     openRules: () => setOverlay('rules'),
+    zoom: setZoomed,
   };
 
   return (
@@ -172,6 +174,7 @@ export function GameScreen() {
       {choice && <ChoiceDialog spec={choice} onDone={() => setChoice(null)} />}
       {!anim && <PendingDialog />}
       <PhaseModal />
+      {zoomed && <CardZoom id={zoomed} onClose={() => setZoomed(null)} />}
     </GameProvider>
   );
 }

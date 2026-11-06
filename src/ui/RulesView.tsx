@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { CARDS, MISSIONS, type CardSet } from '../engine/cards';
 import type { Block } from '../content/types';
 import { useI18n } from '../i18n';
-import { Modal } from './Dialogs';
+import { CardZoom, Modal } from './Dialogs';
 import { cardSrc } from './game';
 import { Rich } from './Rich';
 
@@ -159,9 +159,7 @@ function CardGallery() {
         </section>
       ))}
       {big && (
-        <Modal label={name(big)} onClose={() => setBig(null)} className="zoom">
-          <img src={cardSrc(big, 480)} alt={name(big)} />
-        </Modal>
+        <CardZoom id={big} onClose={() => setBig(null)} />
       )}
     </div>
   );

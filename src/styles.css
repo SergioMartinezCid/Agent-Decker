@@ -216,9 +216,15 @@ a { color: var(--fg); }
 .compact .eq { padding: 3px; }
 
 /* ---------- inspector ---------- */
-.insp { display: grid; gap: 12px; }
-.insp-art { width: 100%; max-width: min(200px, 25vh); justify-self: center; border-radius: 5%; box-shadow: 0 10px 26px #000b; display: block; }
-.compact .insp-art { max-width: 150px; }
+/* The preview grows with the screen height; on short screens it stays small so the actions below stay in view. */
+.insp { display: grid; gap: 12px; --art-max: min(100%, max(25vh, calc(50vh - 190px))); }
+.insp-art { width: 100%; max-width: var(--art-max); justify-self: center; border-radius: 5%; box-shadow: 0 10px 26px #000b; display: block; }
+.insp-art-btn { position: relative; display: block; width: 100%; max-width: var(--art-max); justify-self: center; border: 0; padding: 0; background: transparent; border-radius: 5%; cursor: zoom-in; }
+.insp-art-btn .insp-art { max-width: none; }
+.zoom-hint { position: absolute; top: -6px; right: -6px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: #000d; border: 1px solid var(--rule); color: var(--fg); opacity: 0; transition: opacity 0.15s; }
+.insp-art-btn:hover .zoom-hint, .insp-art-btn:focus-visible .zoom-hint { opacity: 1; }
+@media (hover: none) { .zoom-hint { opacity: 0.9; } }
+.compact .insp { --art-max: 150px; }
 .insp-body { display: grid; gap: 8px; align-content: start; min-width: 0; }
 .insp-body h3 { margin: 0; font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: 0.02em; line-height: 1; text-transform: uppercase; }
 .insp-sub { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 4px; }
@@ -309,7 +315,7 @@ a { color: var(--fg); }
 .handle { display: none; }
 .modal.sheet { padding-top: 12px; }
 .modal.sheet .insp { grid-template-columns: minmax(0, 40%) minmax(0, 1fr); align-items: start; }
-.modal.sheet .insp-art { max-width: none; }
+.modal.sheet .insp { --art-max: none; }
 .modal.sheet .insp-pile { grid-template-columns: 1fr; }
 .modal.panel { width: min(720px, 100%); }
 .modal.rules { width: min(900px, 100%); height: calc(100dvh - 32px); display: flex; flex-direction: column; }
@@ -321,7 +327,7 @@ a { color: var(--fg); }
 .phase-art img { width: 130px; border-radius: 6%; box-shadow: 0 10px 26px #000b; }
 .modal.phase.danger { border-color: var(--danger); }
 .modal.zoom { width: auto; background: transparent; border: 0; box-shadow: none; padding: 0; }
-.modal.zoom img { width: min(420px, 86vw); display: block; border-radius: 5%; }
+.modal.zoom img { width: min(420px, 86vw, calc((100dvh - 48px) * 0.708)); display: block; border-radius: 5%; }
 .modal.zoom .modal-x { top: -6px; right: -6px; }
 .choice-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; }
 .choice-card { position: relative; border: 0; padding: 0; background: transparent; display: grid; gap: 4px; text-align: center; }

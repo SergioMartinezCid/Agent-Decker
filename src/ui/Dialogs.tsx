@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { MISSIONS } from '../engine/cards';
+import { MISSIONS, keyOf } from '../engine/cards';
 import { useI18n } from '../i18n';
 import { dispatch, newGame, retryMission, setScreen } from '../state/store';
-import { CardImg, useGame, type ChoiceSpec } from './game';
+import { CardImg, cardSrc, useGame, type ChoiceSpec } from './game';
 import { Icon } from './icons';
 import { Rich } from './Rich';
+
+const openModals: object[] = [];
 
 /** Modal shell: bottom sheet on phones, centred dialog elsewhere. */
 export function Modal({
@@ -19,18 +21,24 @@ export function Modal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
+    const me = {};
+    openModals.push(me);
     const prev = document.activeElement as HTMLElement | null;
     ref.current?.focus();
+    // Escape closes only the topmost dialog (e.g. a zoomed card over the card sheet).
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && onClose) onClose();
+      if (e.key === 'Escape' && openModals[openModals.length - 1] === me) close.current?.();
     };
     window.addEventListener('keydown', onKey);
     return () => {
       window.removeEventListener('keydown', onKey);
+      openModals.splice(openModals.indexOf(me), 1);
       prev?.focus?.();
     };
-  }, [onClose]);
+  }, []);
   return (
     <div className="modal-bg" onClick={(e) => e.target === e.currentTarget && onClose?.()}>
       <div ref={ref} className={`modal ${className}`} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}>
@@ -43,6 +51,16 @@ export function Modal({
         {children}
       </div>
     </div>
+  );
+}
+
+/** A card shown as large as the screen allows, as in the card gallery. */
+export function CardZoom({ id, onClose }: { id: string; onClose: () => void }) {
+  const { name } = useI18n();
+  return (
+    <Modal label={name(id)} onClose={onClose} className="zoom">
+      <img src={cardSrc(keyOf(id), 480)} alt={name(id)} />
+    </Modal>
   );
 }
 

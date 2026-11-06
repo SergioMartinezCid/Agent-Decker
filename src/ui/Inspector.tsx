@@ -3,6 +3,7 @@ import { defOf, ITEM_TARGET, keyOf, missionDef } from '../engine/cards';
 import { defaultPayment, equipBonus, interactInfo, missionStatus, playInfo, rightmost } from '../engine/engine';
 import { useI18n } from '../i18n';
 import { AlarmBadge, Badge, CardImg, useGame, type Target } from './game';
+import { Icon } from './icons';
 import { Rich } from './Rich';
 
 export function Inspector({ target }: { target: Target | null }) {
@@ -44,11 +45,26 @@ function TopText({ id }: { id: string }) {
   );
 }
 
+/** The inspected card's art; click it to see the card full screen. */
+function InspArt({ id, down }: { id: string; down?: boolean }) {
+  const { zoom } = useGame();
+  const { t } = useI18n();
+  if (down || id === 'back') return <CardImg id={id} down={down} size={480} className="insp-art" />;
+  return (
+    <button className="insp-art-btn" onClick={() => zoom(id)} aria-label={t('insp.zoom')} title={t('insp.zoom')}>
+      <CardImg id={id} size={480} className="insp-art" />
+      <span className="zoom-hint" aria-hidden="true">
+        <Icon name="zoom" size={16} />
+      </span>
+    </button>
+  );
+}
+
 function CardInfo({ id, sub }: { id: string; sub: string }) {
   const { top } = useI18n();
   return (
     <div className="insp">
-      <CardImg id={id} size={480} className="insp-art" />
+      <InspArt id={id} />
       <div className="insp-body">
         <h3>{top(id)}</h3>
         <div className="insp-sub">{sub}</div>
@@ -82,7 +98,7 @@ function LineInspector({ slot }: { slot: number }) {
   if (lc.down) {
     return (
       <div className="insp">
-        <CardImg id={lc.id} down size={480} className="insp-art" />
+        <InspArt id={lc.id} down />
         <div className="insp-body">
           <h3>{t('insp.faceDownTitle')}</h3>
           <div className="insp-sub">{t('insp.position', { n: slot + 1 })}</div>
@@ -120,7 +136,7 @@ function LineInspector({ slot }: { slot: number }) {
 
   return (
     <div className="insp">
-      <CardImg id={lc.id} size={480} className="insp-art" />
+      <InspArt id={lc.id} />
       <div className="insp-body">
         <h3>{c.name}</h3>
         <div className="insp-sub">
@@ -221,7 +237,7 @@ function HandInspector({ id }: { id: string }) {
   const dis = animating;
   return (
     <div className="insp">
-      <CardImg id={id} size={480} className="insp-art" />
+      <InspArt id={id} />
       <div className="insp-body">
         <h3>{top(id)}</h3>
         <div className="insp-sub">{t('insp.inHandTitle')}</div>
@@ -279,7 +295,7 @@ function EquipInspector({ id }: { id: string }) {
     const keep = missionDef(n).rewardKeep;
     return (
       <div className="insp">
-        <CardImg id={id} size={480} className="insp-art" />
+        <InspArt id={id} />
         <div className="insp-body">
           <h3>{m.title}</h3>
           <div className="insp-sub">
@@ -297,7 +313,7 @@ function EquipInspector({ id }: { id: string }) {
   const bonus = equipBonus(id);
   return (
     <div className="insp">
-      <CardImg id={id} size={480} className="insp-art" />
+      <InspArt id={id} />
       <div className="insp-body">
         <h3>{top(id)}</h3>
         <div className="insp-sub">{t('insp.equippedTitle')}</div>
@@ -324,7 +340,7 @@ function MissionInspector() {
   const st = missionStatus(game);
   return (
     <div className="insp">
-      <CardImg id={`mission-${game.mission}`} size={480} className="insp-art" />
+      <InspArt id={`mission-${game.mission}`} />
       <div className="insp-body">
         <h3>{m.title}</h3>
         <div className="insp-sub">{t('insp.missionTitle')}</div>
@@ -356,7 +372,7 @@ function PileInspector({ pile }: { pile: 'deck' | 'discard' | 'play' | 'obsDisca
   if (pile === 'deck') {
     return (
       <div className="insp">
-        <CardImg id="back" size={480} className="insp-art" />
+        <InspArt id="back" />
         <div className="insp-body">
           <h3>{title}</h3>
           <p className="insp-why">{t('insp.deckHidden', { n: game.deck.length })}</p>
