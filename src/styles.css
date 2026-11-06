@@ -216,8 +216,8 @@ a { color: var(--fg); }
 .compact .eq { padding: 3px; }
 
 /* ---------- inspector ---------- */
-/* The preview grows with the screen height; on short screens it stays small so the actions below stay in view. */
-.insp { display: grid; gap: 12px; --art-max: min(100%, max(25vh, calc(50vh - 190px))); }
+/* The preview grows with the screen height up to the panel width; on short screens the panel scrolls to the actions. */
+.insp { display: grid; gap: 12px; --art-max: min(100%, 32vh); }
 .insp-art { width: 100%; max-width: var(--art-max); justify-self: center; border-radius: 5%; box-shadow: 0 10px 26px #000b; display: block; }
 .insp-art-btn { position: relative; display: block; width: 100%; max-width: var(--art-max); justify-self: center; border: 0; padding: 0; background: transparent; border-radius: 5%; cursor: zoom-in; }
 .insp-art-btn .insp-art { max-width: none; }
