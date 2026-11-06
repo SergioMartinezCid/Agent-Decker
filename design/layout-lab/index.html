@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Decker Layout Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Extra+Condensed:wght@500;600;700;800&family=Barlow+Semi+Condensed:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a lab bench — controls on top, one device frame at a time, notes beneath.
+   Single dark look taken from the card backs; mission-set colours come from the card sheet. */
+:root{
+  color-scheme: dark;
+  --ink:#091018; --bench:#0e1823; --panel:#132230; --panel-2:#192c3d; --rule:#25394c; --fg:#e7eef5; --muted:#8fa4b7;
+  --stealth:#9aa5e8; --stealth-ink:#283593; --fight:#f4898d; --fight-ink:#e3262f;
+  --keep:#ffe11a; --warn:#ffb020; --danger:#ff4d4f; --ok:#48d18a;
+  --set-base:#1677c1; --set-start:#1677c1; --set-B:#f19a1f; --set-D:#3faa4a; --set-F:#e0257f; --set-H:#6b2f97; --set-I:#d4232f;
+  --display:"Saira Extra Condensed","Arial Narrow",sans-serif;
+  --body:"Barlow Semi Condensed","Arial Narrow",system-ui,sans-serif;
+}
+body{background:var(--ink);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--keep);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto}
+
+/* ---------- lab chrome ---------- */
+.lab-head h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,6vw,46px);line-height:1;margin:0 0 8px;letter-spacing:.02em;text-wrap:balance}
+.lab-head h1 span{color:var(--keep)}
+.lab-head p{margin:0;max-width:68ch;color:var(--muted)}
+.lab-head p b{color:var(--fg);font-weight:600}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 6px}
+.seg{display:inline-flex;background:var(--bench);border:1px solid var(--rule);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 12px;border-radius:7px;font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em;color:var(--muted)}
+.seg button[aria-selected="true"]{background:var(--panel-2);color:var(--fg);box-shadow:inset 0 -2px 0 var(--keep)}
+.seg button b{color:var(--keep);margin-right:4px}
+.fullbtn{border:1px solid var(--rule);background:var(--bench);border-radius:10px;padding:8px 12px;font-family:var(--display);font-weight:600;font-size:16px;letter-spacing:.04em}
+.stage{display:flex;justify-content:center;margin:22px 0 10px}
+.scaler{position:relative}
+.device{position:absolute;top:0;left:0;transform-origin:0 0;border-radius:30px;overflow:hidden;background:#000;
+  box-shadow:0 0 0 9px #03070b,0 0 0 10px var(--rule),0 30px 70px rgba(0,0,0,.55)}
+.device.desktop{border-radius:10px}
+.device.full{position:fixed;inset:0;transform:none!important;width:100%!important;height:100%!important;border-radius:0;z-index:100;box-shadow:none;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.closefull{position:fixed;z-index:101;right:calc(10px + env(safe-area-inset-right,0px));top:calc(54px + env(safe-area-inset-top,0px));border:1px solid var(--rule);background:#000c;border-radius:999px;padding:6px 12px;font-family:var(--display);font-weight:600;letter-spacing:.05em}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:22px}
+.note{background:var(--bench);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;min-width:0}
+.note h3{margin:0 0 6px;font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:.03em}
+.note p{margin:0 0 8px;color:var(--muted)}
+.note ul{margin:0;padding-left:18px}
+.note li{margin:2px 0}
+.note .plus::marker{content:"+  ";color:var(--ok);font-weight:700}
+.note .minus::marker{content:"–  ";color:var(--danger);font-weight:700}
+.decide{margin-top:26px;background:var(--bench);border:1px solid var(--rule);border-left:4px solid var(--keep);border-radius:12px;padding:16px 18px}
+.decide h2{margin:0 0 8px;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.03em}
+.decide ol{margin:0;padding-left:20px}
+.decide li{margin:6px 0;max-width:80ch}
+.credits{margin-top:26px;color:var(--muted);font-size:13px;max-width:90ch}
+.credits a{color:var(--fg)}
+
+/* ---------- shared game UI ---------- */
+.app{position:relative;width:100%;height:100%;container-type:size;overflow:hidden;color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.3;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='48' viewBox='0 0 28 48'%3E%3Cpath d='M14 0l14 8v16l-14 8-14-8V8z M14 32l14 8v16 M14 32L0 40' fill='none' stroke='%23ffffff' stroke-opacity='.035'/%3E%3C/svg%3E"),
+    radial-gradient(130% 70% at 50% 0%,#174066 0%,#0d1e2e 55%,#081019 100%)}
+.app *{box-sizing:border-box}
+.tb{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px;background:#050b11cc;border-bottom:1px solid var(--rule);flex:none}
+.logo{font-family:var(--display);font-weight:600;letter-spacing:.42em;font-size:9px;line-height:1;color:var(--muted);margin-right:auto}
+.logo b{display:block;letter-spacing:.03em;font-size:20px;font-weight:700;color:var(--fg);line-height:.9}
+.chip{font-family:var(--display);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:4px;background:var(--panel);border:1px solid var(--rule);white-space:nowrap}
+.ib{width:34px;height:34px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px}
+.ib svg{width:18px;height:18px}
+.bd{display:inline-block;vertical-align:middle;flex:none}
+.ti{width:14px;height:14px;display:inline-block;vertical-align:-2px;fill:currentColor}
+.art{display:block;border:0;padding:0;background:transparent;position:relative;aspect-ratio:63/89;border-radius:5%;overflow:visible}
+.art img{width:100%;height:100%;display:block;border-radius:5%;box-shadow:0 4px 14px #0008;object-fit:cover}
+.slot{position:relative;border:0;padding:0;background:transparent;aspect-ratio:63/89;display:block}
+.slot img{width:100%;height:100%;border-radius:5%;display:block;box-shadow:0 4px 14px #0009}
+.slot.gap{border:2px dashed #ffffff33;border-radius:6%;display:grid;place-items:center;text-align:center;color:var(--muted);font-family:var(--display);font-size:13px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
+.slot.gap small{font-size:11px;opacity:.8;text-transform:none;letter-spacing:0;font-family:var(--body)}
+.slot.down img{filter:brightness(.55) saturate(.5)}
+.ko{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-12deg);font-family:var(--display);font-weight:800;font-size:12px;letter-spacing:.08em;background:#000c;border:1.5px solid #fff8;padding:1px 6px;border-radius:3px;white-space:nowrap;color:#fff}
+.slot-n{position:absolute;top:-7px;left:-5px;width:18px;height:18px;border-radius:50%;background:#000;border:1px solid #ffffff55;font-family:var(--display);font-weight:700;font-size:11px;display:grid;place-items:center;z-index:2}
+.mod{position:absolute;right:-6px;top:38%;background:var(--danger);color:#fff;font-family:var(--display);font-weight:800;font-size:12px;padding:0 5px;border-radius:4px;box-shadow:0 2px 6px #0008;z-index:2}
+.exit-tag{position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);white-space:nowrap;background:var(--danger);color:#fff;font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.05em;padding:1px 6px;border-radius:3px;z-index:2;text-transform:uppercase}
+.am{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:8px;row-gap:2px;min-width:0}
+.am-num{font-family:var(--display);font-weight:800;font-size:26px;line-height:.9;color:var(--warn);grid-row:span 2}
+.am-num span{font-size:13px;color:var(--muted);font-weight:600}
+.am-bar{position:relative;height:9px;background:#1b2a39;border-radius:5px;overflow:hidden}
+.am-bar::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(20% - 1px),#000a calc(20% - 1px) 20%)}
+.am-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--ok),var(--warn));border-radius:5px 0 0 5px}
+.am-next{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,var(--danger) 0 3px,#ff4d4f55 3px 6px)}
+.am-cap{font-size:11px;color:var(--muted);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.am-cap b{color:var(--danger)}
+.goal{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:14px;min-width:0}
+.goal .k{font-family:var(--display);font-weight:800;letter-spacing:.08em;color:var(--set-H);text-transform:uppercase;font-size:15px}
+.goal .st{font-size:12px;color:var(--muted);width:100%}
+.goal .st i{color:var(--danger);font-style:normal}
+.pool{display:flex;align-items:center;gap:10px}
+.pl{display:inline-flex;align-items:center;gap:3px;font-family:var(--display);font-weight:800;font-size:20px}
+.pl.zero{opacity:.45}
+.ints{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);white-space:nowrap}
+.ints i{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--keep);display:inline-block}
+.ints i.on{background:var(--keep)}
+.pile{border:1px solid var(--rule);background:var(--panel);border-radius:8px;padding:3px 8px;display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;min-width:48px}
+.pile span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.pile b{font-family:var(--display);font-size:18px}
+.eq{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--rule);background:var(--panel);border-radius:999px;padding:2px 9px 2px 4px;white-space:nowrap;font-size:12px}
+.eq.used{opacity:.55}
+.eq.used::after{content:"✓";color:var(--ok);font-weight:700}
+.eq.keep{border-color:#ffe11a66}
+.endturn{border:0;border-radius:10px;background:var(--keep);color:#111;font-family:var(--display);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:17px;padding:10px 16px;box-shadow:0 3px 0 #a89400}
+.ghost{border:1px solid var(--rule);background:var(--panel);border-radius:10px;padding:9px 12px;font-family:var(--display);font-weight:600;letter-spacing:.05em;font-size:15px}
+.lbl{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.fan{display:flex;justify-content:center;align-items:flex-end}
+.fan .hc{flex:none;border:0;padding:0;background:transparent;transition:transform .15s}
+.fan .hc img{width:100%;display:block;border-radius:5%;box-shadow:-4px 4px 14px #000a}
+.fan .hc:hover,.fan .hc:focus-visible{z-index:5}
+
+/* sheet */
+.sheet-bg{position:absolute;inset:0;background:#000a;z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-height:92%;overflow:auto;background:var(--bench);border-top:1px solid var(--rule);border-radius:18px 18px 0 0;padding:14px 16px 18px;display:grid;grid-template-columns:42% 1fr;gap:14px;align-items:start;box-shadow:0 -10px 40px #000}
+.desktop .sheet-bg{align-items:center}
+.desktop .sheet{width:640px;border-radius:16px;border:1px solid var(--rule)}
+.sheet img{width:100%;border-radius:5%;display:block}
+.sheet h3{margin:0;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:.03em;line-height:1}
+.sheet .sub{color:var(--muted);font-size:12px;margin:2px 0 10px;text-transform:uppercase;letter-spacing:.08em}
+.sheet .row{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:14px;flex-wrap:wrap}
+.sheet .why{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.sheet .why b{color:var(--danger)}
+.acts{display:grid;gap:8px;margin-top:10px}
+.act{display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid var(--rule);background:var(--panel-2);border-radius:10px;padding:9px 12px;text-align:left;font-weight:600}
+.act small{font-weight:400;color:var(--muted)}
+.act[disabled]{opacity:.45;cursor:not-allowed}
+.act.go{border-color:var(--keep);background:#ffe11a1a}
+.handle{grid-column:1/-1;width:40px;height:4px;border-radius:2px;background:#ffffff33;justify-self:center;margin-top:-6px}
+.desktop .handle{display:none}
+
+/* ---------- A: tabletop ---------- */
+.A.ph{display:flex;flex-direction:column}
+.A.ph .mrow{display:flex;gap:10px;align-items:center;padding:10px 12px 6px}
+.A.ph .mrow .art{width:15cqw;flex:none}
+.A.ph .mrow .col{display:grid;gap:7px;min-width:0;flex:1}
+.A .lhead{display:flex;justify-content:space-between;align-items:center;padding:4px 12px 0;gap:8px}
+.A .mini{display:flex;gap:3px}
+.A .mini i{width:16px;height:10px;border-radius:2px;background:var(--panel-2);border:1px solid #ffffff22}
+.A .mini i.win{outline:1.5px solid var(--keep);outline-offset:1px}
+.A.ph .line{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px 12px 16px;scrollbar-width:none;flex:none}
+.A.ph .line::-webkit-scrollbar{display:none}
+.A.ph .line > *{width:39cqw;flex:none;scroll-snap-align:start}
+.A.ph .line .od{width:20cqw}
+.A .od{display:grid;place-items:center;text-align:center;border:1px solid var(--rule);border-radius:6%;aspect-ratio:63/89;background:#000;color:var(--muted);font-size:11px;line-height:1.2;position:relative;overflow:hidden}
+.A .od img{position:absolute;inset:0;width:100%;height:100%;opacity:.55;object-fit:cover}
+.A .od span{position:relative;font-family:var(--display);font-weight:700;color:var(--fg);font-size:13px;letter-spacing:.05em}
+.A .od b{display:block;font-size:22px}
+.A.ph .status{display:flex;align-items:center;gap:8px;padding:6px 12px;border-block:1px solid var(--rule);background:#050b1188;flex-wrap:wrap}
+.A.ph .status .pool{margin-right:auto}
+.A.ph .hand{flex:1;min-height:0;padding:10px 12px 0;display:flex;align-items:center;justify-content:center}
+.A.ph .hand .hc{width:30cqw;margin-left:-13cqw}
+.A.ph .hand .hc:first-child{margin-left:0}
+.A.ph .actions{display:flex;gap:8px;padding:10px 12px 12px;align-items:center}
+.A.ph .actions .endturn{margin-left:auto}
+
+.A.dt{display:grid;grid-template-columns:240px 1fr;grid-template-rows:46px auto auto 1fr}
+.A.dt .tb{grid-column:1/-1}
+.A.dt .side{grid-row:2/5;border-right:1px solid var(--rule);padding:14px;display:flex;flex-direction:column;gap:14px;background:#050b1155}
+.A.dt .side .art{width:150px;align-self:center}
+.A.dt .scores{display:grid;grid-template-columns:1fr auto;font-size:13px;gap:2px 10px;color:var(--muted)}
+.A.dt .scores b{color:var(--fg);font-family:var(--display);font-size:15px;text-align:right}
+.A.dt .lrow{display:grid;grid-template-columns:96px repeat(6,1fr) 96px;gap:12px;padding:16px 20px 18px;align-items:end}
+.A.dt .lrow .cap{grid-column:1/-1;display:flex;justify-content:space-between}
+.A.dt .prow{display:flex;gap:18px;padding:8px 20px;align-items:flex-start;border-block:1px solid var(--rule);background:#050b1166}
+.A.dt .zone{display:grid;gap:6px;justify-items:start}
+.A.dt .zone .stack{display:flex}
+.A.dt .zone .stack .art{width:66px}
+.A.dt .zone .stack.ov .art + .art{margin-left:-40px}
+.A.dt .zone.eqz .stack .art + .art{margin-left:6px}
+.A.dt .hrow{display:flex;align-items:center;padding:6px 24px 14px;gap:24px;min-height:0}
+.A.dt .hrow .fan{flex:1}
+.A.dt .hrow .hc{width:150px;margin-left:-38px}
+.A.dt .hrow .hc:first-child{margin-left:0}
+.A.dt .hrow .panel{display:grid;gap:12px;justify-items:end}
+
+/* ---------- B: wrapped line ---------- */
+.B.ph{display:flex;flex-direction:column}
+.B.ph .hud{display:grid;gap:8px;padding:9px 14px 4px}
+.B .lcap{display:flex;justify-content:space-between;align-items:center;padding:6px 14px 0}
+.B.ph .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px;padding:12px 18px 14px;position:relative}
+.B .chev{position:absolute;font-family:var(--display);font-weight:800;color:#ffffff55;font-size:18px;pointer-events:none}
+.B .wrapline{position:absolute;pointer-events:none;border:2px solid #ffffff22;border-top:0;border-left:0;border-radius:0 0 10px 0}
+.B .exitm{position:absolute;right:4px;bottom:-2px;font-family:var(--display);font-weight:700;font-size:11px;color:var(--danger);letter-spacing:.06em}
+.B.ph .tray{display:flex;align-items:center;gap:8px;padding:6px 14px;border-block:1px solid var(--rule);background:#050b1188;overflow-x:auto;scrollbar-width:none;flex:none}
+.B.ph .tray .pool{padding-right:8px;border-right:1px solid var(--rule)}
+.B.ph .hand{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:8px 10px 0}
+.B.ph .hand .hc{width:27cqw;margin-left:-9cqw}
+.B.ph .hand .hc:first-child{margin-left:0}
+.B.ph .actions{display:flex;gap:6px;padding:8px 12px 12px;align-items:center}
+.B.ph .actions .endturn{margin-left:auto}
+
+.B.dt{display:grid;grid-template-columns:220px 1fr 330px;grid-template-rows:46px 1fr}
+.B.dt .tb{grid-column:1/-1}
+.B.dt .side{border-right:1px solid var(--rule);padding:14px;display:flex;flex-direction:column;gap:14px;background:#050b1155;min-height:0}
+.B.dt .side .art{width:130px;align-self:center}
+.B.dt .side .eqs{display:flex;flex-wrap:wrap;gap:6px}
+.B.dt .side .piles{display:flex;gap:6px}
+.B.dt .center{display:flex;flex-direction:column;padding:14px 20px;gap:12px;min-width:0}
+.B.dt .dline{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;padding-top:8px}
+.B.dt .dline .slot.sel{outline:3px solid var(--keep);outline-offset:3px;border-radius:6%}
+.B.dt .poolrow{display:flex;align-items:center;gap:16px;padding:8px 12px;border:1px solid var(--rule);border-radius:10px;background:#050b1188}
+.B.dt .poolrow .endturn{margin-left:auto}
+.B.dt .dhand{display:flex;gap:12px;align-items:flex-start;min-height:0}
+.B.dt .dhand .hc{width:132px!important}
+.B.dt .dhand .hc{width:118px;border:0;padding:0;background:transparent}
+.B.dt .dhand .hc img{width:100%;border-radius:5%;display:block;box-shadow:0 4px 14px #000a}
+.B.dt .insp{border-left:1px solid var(--rule);background:var(--bench);padding:14px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.B.dt .insp img{width:190px;align-self:center;border-radius:5%;box-shadow:0 8px 24px #000a}
+.B.dt .insp h3{margin:0;font-family:var(--display);font-weight:800;font-size:24px;line-height:1}
+
+/* ---------- C: vertical conveyor ---------- */
+.C.ph{display:flex;flex-direction:column}
+.C.ph .hud{display:grid;gap:8px;padding:9px 12px 4px}
+.C .flow{font-family:var(--display);font-weight:600;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;padding:3px 0}
+.C .flow.out{color:var(--danger)}
+.C.ph .conv{display:flex;flex-direction:column;gap:5px;padding:0 10px;flex:none}
+.strip{display:grid;grid-template-columns:16px 38px 1fr 36px;align-items:center;gap:8px;min-height:58px;border:0;text-align:left;padding:5px 8px 5px 6px;border-radius:8px;background:linear-gradient(90deg,var(--sc) 0 5px,#0a121b 5px);box-shadow:inset 0 0 0 1px #ffffff14;position:relative}
+.strip .sn{font-family:var(--display);font-weight:700;color:var(--muted);font-size:13px;text-align:center}
+.strip .main{min-width:0;display:grid;gap:1px}
+.strip .nm{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.03em;line-height:1;text-transform:uppercase;display:flex;align-items:center;gap:5px}
+.strip .ab{font-size:12px;color:#c9d6e2;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.strip .gets{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strip .gets b{color:var(--fg);font-weight:600}
+.strip .cost{position:relative;display:grid;place-items:center}
+.strip .cost .mod{position:absolute;right:-8px;top:-6px}
+.strip.gap{background:transparent;box-shadow:none;border:1.5px dashed #ffffff2a;min-height:30px;grid-template-columns:16px 1fr;color:var(--muted);font-size:12px}
+.strip.down{background:#0a121b;min-height:34px;grid-template-columns:16px 1fr auto}
+.strip.down .nm{color:var(--muted);font-size:14px}
+.strip.exit{box-shadow:inset 0 0 0 1.5px var(--danger)}
+.strip.exit::after{content:"Leaves next";position:absolute;right:46px;top:-7px;background:var(--danger);color:#fff;font-family:var(--display);font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:0 5px;border-radius:3px}
+.strip .mi{font-family:var(--display);font-size:10px;letter-spacing:.06em;color:#111;background:var(--keep);padding:0 4px;border-radius:2px;font-weight:700}
+.C.ph .tray{display:flex;align-items:center;gap:8px;padding:6px 12px;border-block:1px solid var(--rule);background:#050b1188;overflow-x:auto;scrollbar-width:none;flex:none;margin-top:2px}
+.C.ph .tray .pool{padding-right:8px;border-right:1px solid var(--rule)}
+.C.ph .hand{flex:1;min-height:0;display:flex;gap:8px;overflow-x:auto;padding:10px 12px 4px;align-items:flex-start;scrollbar-width:none}
+.C.ph .hand .cc{min-height:min(150px,100%)}
+.cc{flex:none;width:31cqw;border:0;border-radius:9px;padding:0;text-align:left;background:#0a121b;box-shadow:inset 0 0 0 1px #ffffff1a,0 4px 12px #0008;overflow:hidden;display:flex;flex-direction:column}
+.cc .top{background:linear-gradient(160deg,var(--sc),color-mix(in srgb,var(--sc) 55%,#000));padding:7px 8px 6px;display:flex;align-items:center;gap:6px;min-height:42px;position:relative}
+.cc .top b{font-family:var(--display);font-weight:700;font-size:16px;line-height:1;text-transform:uppercase;letter-spacing:.02em}
+.cc .x{padding:6px 8px 8px;font-size:12px;line-height:1.25;color:#d5e0ea}
+.cc .x.dim{color:var(--muted);font-style:italic}
+.cc .kp{position:absolute;right:4px;top:4px;font-family:var(--display);font-weight:800;font-size:10px;color:#111;background:var(--keep);padding:0 4px;border-radius:2px;letter-spacing:.05em;transform:rotate(-6deg)}
+.C.ph .actions{display:flex;gap:6px;padding:8px 12px 12px;align-items:center}
+.C.ph .actions .endturn{margin-left:auto}
+
+.C.dt{display:grid;grid-template-columns:1fr 300px;grid-template-rows:46px auto auto 1fr}
+.C.dt .tb{grid-column:1/-1}
+.C.dt .lrow{padding:14px 20px 10px;display:grid;gap:8px}
+.C.dt .cards{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.fc{border:0;padding:0;text-align:left;border-radius:10px;overflow:hidden;background:#05090e;box-shadow:inset 0 0 0 1px #ffffff1c,0 6px 18px #000a;display:flex;flex-direction:column;aspect-ratio:63/89;position:relative}
+.fc .t{background:linear-gradient(160deg,var(--sc),color-mix(in srgb,var(--sc) 50%,#000));padding:8px 9px 26px;clip-path:polygon(0 0,100% 0,100% 72%,0 100%);display:grid;gap:3px}
+.fc .t .h{display:flex;align-items:center;gap:6px}
+.fc .t b{font-family:var(--display);font-weight:700;font-size:15px;text-transform:uppercase;line-height:1}
+.fc .t p{margin:0;font-size:11.5px;line-height:1.2}
+.fc .o{padding:2px 9px 9px;display:flex;flex-direction:column;gap:4px;flex:1}
+.fc .o h4{margin:0;font-family:var(--display);font-weight:800;font-size:19px;line-height:.95;text-transform:uppercase;letter-spacing:.02em}
+.fc .o p{margin:0;font-size:12px;line-height:1.22;color:#d3dee8}
+.fc .o .ft{margin-top:auto;display:flex;align-items:center;gap:6px}
+.fc .o .ft .ti{margin-right:auto;width:16px;height:16px;color:var(--muted)}
+.fc.down{background:#05090e;display:grid;place-items:center;color:var(--muted);font-family:var(--display);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.fc.gap{background:transparent;box-shadow:none;border:2px dashed #ffffff26;display:grid;place-items:center;color:var(--muted);font-family:var(--display);font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+.fc.exit{box-shadow:inset 0 0 0 2px var(--danger),0 6px 18px #000a}
+.fc .xt{position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);background:var(--danger);color:#fff;font-family:var(--display);font-weight:700;font-size:11px;letter-spacing:.05em;padding:1px 7px;border-radius:4px 4px 0 0;white-space:nowrap;text-transform:uppercase}
+.fc .mod{right:6px;top:auto;bottom:44px}
+.C.dt .prow{display:flex;gap:10px;align-items:center;padding:8px 20px;border-block:1px solid var(--rule);background:#050b1166;flex-wrap:wrap}
+.C.dt .prow .pool{padding-right:12px;border-right:1px solid var(--rule)}
+.C.dt .hrow{display:flex;gap:12px;padding:16px 20px;align-items:flex-start;min-height:0}
+.C.dt .hrow .cc{width:168px;min-height:170px}
+.C.dt .hrow .cc .top b{font-size:18px}
+.C.dt .hrow .cc .x{font-size:13.5px}
+.C.dt .hrow .endturn{margin-left:auto;align-self:center}
+.C.dt .log{grid-column:2;grid-row:2/5;border-left:1px solid var(--rule);background:var(--bench);padding:14px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.C.dt .log ol{list-style:none;margin:0;padding:0;display:grid;gap:7px;font-size:13px;color:#c9d6e2}
+.C.dt .log li{padding-left:10px;border-left:2px solid var(--rule)}
+.C.dt .log li.al{border-left-color:var(--danger)}
+.C.dt .log li.mv{border-left-color:var(--stealth)}
+.C.dt .log li span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}
+@media (prefers-reduced-motion:reduce){.fan .hc{transition:none}}
+</style>
+
+<div class="wrap">
+  <header class="lab-head">
+    <h1>Agent Decker <span>Layout Lab</span></h1>
+    <p>The same moment of play laid out three ways. <b>Mission 4, mid-turn:</b> one obstacle already disarmed (the gap), one knocked out, the Watchtower raising the Sniper's cost, and a Keycard that can open the Prison Door. Switch concept and screen size, then tap any card inside the frame to see how inspecting and acting would work. On a phone, use <b>Open full screen</b> to try it at real size.</p>
+  </header>
+
+  <nav class="controls" aria-label="Mockup controls">
+    <div class="seg" role="tablist" id="concepts" aria-label="Concept">
+      <button role="tab" data-c="A" aria-selected="true"><b>A</b>Tabletop</button>
+      <button role="tab" data-c="B" aria-selected="false"><b>B</b>Wrapped line</button>
+      <button role="tab" data-c="C" aria-selected="false"><b>C</b>Vertical conveyor</button>
+    </div>
+    <div class="seg" role="tablist" id="devices" aria-label="Screen">
+      <button role="tab" data-d="phone" aria-selected="true">Phone</button>
+      <button role="tab" data-d="desktop" aria-selected="false">Desktop</button>
+    </div>
+    <button class="fullbtn" id="fullbtn">Open full screen</button>
+  </nav>
+
+  <section class="stage"><div class="scaler" id="scaler"><div class="device" id="device"></div></div></section>
+
+  <section class="notes" id="notes"></section>
+
+  <section class="decide">
+    <h2>What I'd like your take on</h2>
+    <ol>
+      <li><b>Phone:</b> which concept feels right? Mixing is fine, e.g. C's conveyor with A's card art in the hand.</li>
+      <li><b>Card look:</b> original art everywhere, with a tap to read ability text, or redrawn readable cards in the same colours, with the original art shown when you inspect a card?</li>
+      <li><b>Desktop:</b> a persistent inspector panel (B), a pop-up zoom (A), or a turn log that explains automatic line moves (C)?</li>
+      <li><b>Phones held sideways:</b> use the desktop layout in a compact form, or ask the player to rotate back to portrait?</li>
+    </ol>
+  </section>
+
+  <footer class="credits">
+    Card art and game design: <a href="https://gr9yfox.itch.io/agent-decker">Agent Decker</a> by Manuel Correia, licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a>. Card images are cropped from the print-and-play PDF without other changes. The text cards in concept C are adaptations. This is a static mockup with no game logic.
+  </footer>
+</div>
+
+<script>
+const D = {
+  'watchtower':{n:'Watchtower',set:'F',t:'location',c:['s',12],a:7,ab:'Watchtower increases the cost of adjacent cards by 2.',top:{n:'Foresight',x:'Look at the top five cards of your deck and put them back in any order.'}},
+  'sniper':{n:'Sniper',set:'F',t:'person',c:['f',10],a:6,ab:"Sniper can't be interacted with unless it's the only {person} in the line.",top:{n:'Just the Thing',x:'Search your deck for a card. Shuffle it, then place it on top.'}},
+  'prison-door':{n:'Prison Door',set:'F',t:'door',c:['f',10],a:5,top:{n:'Prisoner',r:['f',1],keep:1},mi:1},
+  'security-camera':{n:'Security Camera',set:'base',t:'electronic',c:['s',2],a:8,top:{n:'Out of Sight',r:['s',2]}},
+  'guard':{n:'Guard',set:'base',t:'person',c:['f',2],a:4,top:{n:'Gun',r:['f',2]}},
+  'patrolling-guard':{n:'Patrolling Guard',set:'base',t:'person',c:['a',5],a:5,ab:'During the Line Scroll, Patrolling Guard slides forward one more position.',top:{n:'Interrogate',x:'Draw two cards.'}},
+  'guard-dog':{n:'Guard Dog',set:'base',t:'animal',c:['f',5],a:6,ab:"When Guard Dog appears, if there is a {person} on the line, slide it all the way until it's adjacent to it.",top:{n:'Follow',r:['s',1],x:'Draw a card.'}},
+  'guard-with-bazooka':{n:'Guard with Bazooka',set:'F',t:'person',c:['f',8],a:10,top:{n:'Bazooka',r:['f',5],x:'When used, goes to the obstacles discard instead of yours.'}},
+  'hide':{n:'Hide',set:'start',top:{n:'Hide',r:['s',1]}},
+  'punch':{n:'Punch',set:'start',top:{n:'Punch',r:['f',1]}},
+  'yard-door':{n:'Yard Door',set:'base',t:'door',c:['s',4],a:4,top:{n:'Throw a Rock',x:'{f1} or draw a card.'}},
+  'locker-room':{n:'Locker Room',set:'B',t:'location',c:['a',8],a:3,top:{n:'Guard Uniform',r:['s',1],keep:1}},
+  'sleeping-guard':{n:'Sleeping Guard',set:'base',t:'person',c:['s',3],a:0,top:{n:'Keycard',keep:1,x:'Place Keycard in your discard to interact with a {door}.'}},
+  'motion-sensor-hall':{n:'Motion Sensor Hall',set:'base',t:'location',c:['a',6],a:6,top:{n:"Don't Move",r:['s',3]}},
+  'mission-1':{n:'Map',set:'base',top:{n:'Map',r:['s',1],keep:1}},
+  'mission-2':{n:'New Rule',set:'D',top:{n:'New Rule',x:'You can now interact with up to TWO obstacle cards per turn.',keep:1}},
+  'mission-3':{n:'New Rule',set:'F',top:{n:'New Rule',x:'At the start of the turn, draw FIVE cards instead of four.'}},
+  'mission-4':{n:'Mission Four',set:'H'},
+  'back':{n:'Knocked out'}
+};
+const S = {
+  alarm:31, next:8, scores:[18,24,27],
+  line:['watchtower','sniper',{down:1},null,'prison-door','security-camera'],
+  mods:{1:2},
+  obsDeck:9, obsDiscard:12, obsTop:'guard',
+  hand:['guard','patrolling-guard','guard-dog','guard-with-bazooka','hide'],
+  play:['punch','punch','security-camera','yard-door'],
+  equip:[{id:'mission-1',l:'Map',r:['s',1],used:1,keep:1},{id:'mission-2',l:'2 interactions',keep:1},{id:'mission-3',l:'Draw 5'},{id:'locker-room',l:'Uniform',r:['s',1],used:1,keep:1},{id:'sleeping-guard',l:'Keycard',t:'door',keep:1}],
+  pool:{s:0,f:2}, ints:[1,2], deck:11, discard:6, discardTop:'motion-sensor-hall'
+};
+const TYPES = {
+  person:'<path d="M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9zm-8 9c0-4.4 3.6-7 8-7s8 2.6 8 7z"/>',
+  location:'<path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>',
+  animal:'<circle cx="6" cy="9" r="2.2"/><circle cx="10" cy="5" r="2.2"/><circle cx="14" cy="5" r="2.2"/><circle cx="18" cy="9" r="2.2"/><path d="M12 10c-3 0-6 4.5-6 7.5 0 2 1.6 3 3 3 1.2 0 2-.6 3-.6s1.8.6 3 .6c1.4 0 3-1 3-3 0-3-3-7.5-6-7.5z"/>',
+  electronic:'<path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2zM9 19h6v1.5a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 20.5z"/>',
+  door:'<path d="M6 2h12v20H6zm8 9.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z" fill-rule="evenodd"/>'
+};
+const ti = t => t ? `<svg class="ti" viewBox="0 0 24 24" aria-label="${t}">${TYPES[t]}</svg>` : '';
+function badge([k,v], size=28){
+  const txt = `<text x="20" y="${k==='s'?31:26}" text-anchor="middle" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${String(v).length>1?17:19}" fill="#151a33">${v}</text>`;
+  if(k==='s') return `<svg class="bd" width="${size}" height="${size}" viewBox="0 0 40 40" aria-label="${v} stealth"><path d="M20 4 37 35H3Z" fill="#9aa5e8" stroke="#283593" stroke-width="3.5" stroke-linejoin="round"/>${txt}</svg>`;
+  if(k==='f') return `<svg class="bd" width="${size}" height="${size}" viewBox="0 0 40 40" aria-label="${v} fight"><circle cx="20" cy="20" r="16.5" fill="#f4898d" stroke="#e3262f" stroke-width="3.5"/>${txt}</svg>`;
+  return `<svg class="bd" width="${size}" height="${size}" viewBox="0 0 40 40" aria-label="${v} any"><circle cx="20" cy="20" r="17" fill="#9aa5e8" stroke="#283593" stroke-width="3"/><path d="M20 8 32 29H8Z" fill="none" stroke="#e3262f" stroke-width="2.6" stroke-linejoin="round"/>${txt.replace('y="26"','y="27"')}</svg>`;
+}
+function alarmB(v,size=28){
+  return `<svg class="bd" width="${size}" height="${size}" viewBox="0 0 40 40" aria-label="alarm ${v}"><circle cx="20" cy="20" r="17.5" fill="#fff"/><circle cx="20" cy="20" r="14" fill="#0b0b0b"/><path d="M20 1v6M20 33v6M1 20h6M33 20h6" stroke="#0b0b0b" stroke-width="3"/><text x="20" y="27" text-anchor="middle" font-family="Saira Extra Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${String(v).length>1?16:19}" fill="#fff">${v}</text></svg>`;
+}
+const fmt = s => (s||'').replace(/\{(person|door|electronic|location|animal)\}/g,(m,t)=>ti(t)).replace(/\{f1\}/g, badge(['f',1],16));
+const img = (id,w=240) => `<img src="cards/${w}/${id}.webp" alt="${(D[id]||{}).n||id}" draggable="false" loading="lazy">`;
+const sc = id => `--sc:var(--set-${(D[id]||{}).set||'base'})`;
+const topSum = t => t.r ? `${badge(t.r,16)} <b>${t.n}</b>${t.x?' · '+fmt(t.x):''}${t.keep?' · KEEP':''}` : `<b>${t.n}</b> · ${fmt(t.x)}`;
+const lastIdx = () => { for(let i=5;i>=0;i--) if(S.line[i]) return i; };
+
+/* shared pieces */
+const topbar = (extra='') => `<header class="tb"><span class="logo">AGENT<b>DECKER</b></span>${extra}<span class="chip">Mission 4</span><button class="ib" aria-label="Rules">?</button><button class="ib" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></header>`;
+const alarm = () => `<div class="am"><div class="am-num">${S.alarm}<span>/50</span></div><div class="am-bar"><i class="am-fill" style="width:${S.alarm*2}%"></i><i class="am-next" style="left:${S.alarm*2}%;width:${S.next*2}%"></i></div><div class="am-cap">ALARM · next scroll <b>+${S.next}</b></div></div>`;
+const goal = () => `<div class="goal"><span class="k">Goal</span>Get ${badge(['a',18],24)} and the <b>Prisoner</b><span class="st">Prisoner <i>not equipped</i> · pool 2 of 18</span></div>`;
+const pool = () => `<div class="pool"><span class="pl ${S.pool.s?'':'zero'}">${badge(['s',''],22)}${S.pool.s}</span><span class="pl">${badge(['f',''],22)}${S.pool.f}</span><span class="ints"><i class="on"></i><i></i>${S.ints[0]}/${S.ints[1]} interactions</span></div>`;
+const eqChips = () => S.equip.map(e=>`<button class="eq ${e.used?'used':''} ${e.keep?'keep':''}" data-card="${e.id}">${e.r?badge(e.r,18):e.t?ti(e.t):'<span class="lbl" style="font-size:10px;letter-spacing:.06em">Rule</span>'} ${e.l}</button>`).join('');
+const piles = () => `<button class="pile" data-card="back"><span>Deck</span><b>${S.deck}</b></button><button class="pile" data-card="${S.discardTop}"><span>Discard</span><b>${S.discard}</b></button><button class="pile" data-card="yard-door"><span>Played</span><b>${S.play.length}</b></button>`;
+function slotArt(item,i){
+  if(item===null) return `<div class="slot gap"><span>Empty<br><small>disarmed this turn</small></span><span class="slot-n">${i+1}</span></div>`;
+  if(item.down) return `<button class="slot down" data-card="back" data-slot="${i}">${img('back')}<span class="ko">KNOCKED OUT</span><span class="slot-n">${i+1}</span></button>`;
+  return `<button class="slot" data-card="${item}" data-slot="${i}">${img(item)}${S.mods[i]?`<span class="mod">+${S.mods[i]}</span>`:''}${i===lastIdx()?`<span class="exit-tag">Leaves next +${D[item].a}</span>`:''}<span class="slot-n">${i+1}</span></button>`;
+}
+function fan(ids, cls='hc'){ const n=ids.length; return ids.map((id,i)=>{const a=(i-(n-1)/2)*5; const y=Math.abs(i-(n-1)/2)**2*3; return `<button class="${cls}" data-card="${id}" style="transform:translateY(${y}px) rotate(${a}deg)">${img(id)}</button>`}).join(''); }
+const actions = () => `<button class="ghost">Undo</button><button class="ghost">Rules</button><button class="endturn">End turn</button>`;
+
+/* ---------- A ---------- */
+function A_phone(){
+  const mini = S.line.map((x,i)=>`<i class="${i<2?'win':''}" style="background:${x===null?'transparent':x.down?'#333':`var(--set-${D[x].set})`};${x===null?'border-style:dashed':''}"></i>`).join('');
+  return `<div class="app A ph">${topbar()}
+  <section class="mrow"><button class="art" data-card="mission-4">${img('mission-4')}</button><div class="col">${goal()}${alarm()}</div></section>
+  <div class="lhead"><span class="lbl">The line → exit</span><span class="mini" aria-label="Line overview">${mini}</span></div>
+  <section class="line"><div class="od">${img('back')}<span>Obstacles<b>${S.obsDeck}</b></span></div>${S.line.map(slotArt).join('')}<div class="od">${img(S.obsTop)}<span>Discard<b>${S.obsDiscard}</b></span></div></section>
+  <section class="status">${pool()}${piles()}</section>
+  <section class="hand"><div class="fan">${fan(S.hand)}</div></section>
+  <footer class="actions"><button class="ghost">Equip · 5</button>${actions()}</footer></div>`;
+}
+function A_desktop(){
+  return `<div class="app A dt">${topbar()}
+  <aside class="side"><button class="art" data-card="mission-4">${img('mission-4')}</button>${goal()}${alarm()}
+    <div><div class="lbl" style="margin-bottom:4px">Campaign</div><div class="scores">${S.scores.map((s,i)=>`<span>Mission ${i+1}</span><b>${s}</b>`).join('')}<span>Mission 4</span><b>–</b></div></div></aside>
+  <section class="lrow"><div class="cap"><span class="lbl">Obstacle deck</span><span class="lbl">The line · cards enter left, leave right</span><span class="lbl">Discard</span></div>
+    <div class="A od" style="border:0">${img('back')}<span>${S.obsDeck}</span></div>${S.line.map(slotArt).join('')}<div class="A od">${img(S.obsTop)}<span>${S.obsDiscard}</span></div></section>
+  <section class="prow">
+    <div class="zone"><span class="lbl">Deck</span><div class="stack"><button class="art" data-card="back">${img('back')}</button></div><b>${S.deck}</b></div>
+    <div class="zone"><span class="lbl">Discard</span><div class="stack"><button class="art" data-card="${S.discardTop}">${img(S.discardTop)}</button></div><b>${S.discard}</b></div>
+    <div class="zone"><span class="lbl">Play area</span><div class="stack ov">${S.play.map(id=>`<button class="art" data-card="${id}">${img(id)}</button>`).join('')}</div></div>
+    <div class="zone eqz" style="margin-left:auto"><span class="lbl">Equip area</span><div class="stack">${S.equip.map(e=>`<button class="art" data-card="${e.id}">${img(e.id)}</button>`).join('')}</div></div>
+  </section>
+  <section class="hrow"><div class="fan">${fan(S.hand)}</div><div class="panel">${pool()}<div style="display:flex;gap:8px">${actions()}</div></div></section></div>`;
+}
+/* ---------- B ---------- */
+function B_phone(){
+  return `<div class="app B ph">${topbar()}
+  <section class="hud">${goal()}${alarm()}</section>
+  <div class="lcap"><span class="lbl">The line · reads like text, 1 → 6</span><span class="lbl">Obstacles ${S.obsDeck} · Discard ${S.obsDiscard}</span></div>
+  <section class="grid">${S.line.map(slotArt).join('')}
+    <span class="chev" style="left:calc(33.3% + 1px);top:24%">›</span><span class="chev" style="left:calc(66.6% - 2px);top:24%">›</span>
+    <span class="chev" style="left:calc(33.3% + 1px);top:72%">›</span><span class="chev" style="left:calc(66.6% - 2px);top:72%">›</span>
+    <span class="exitm">EXIT ▸</span></section>
+  <section class="tray">${pool()}${eqChips()}</section>
+  <section class="hand"><div class="fan">${fan(S.hand)}</div></section>
+  <footer class="actions">${piles()}<button class="endturn">End turn</button></footer></div>`;
+}
+function B_desktop(){
+  return `<div class="app B dt">${topbar()}
+  <aside class="side"><button class="art" data-card="mission-4">${img('mission-4')}</button>${goal()}${alarm()}
+    <div><div class="lbl" style="margin-bottom:6px">Equipped</div><div class="eqs">${eqChips()}</div></div>
+    <div class="piles">${piles()}</div></aside>
+  <section class="center"><div style="display:flex;justify-content:space-between"><span class="lbl">The line · cards enter left, leave right</span><span class="lbl">Obstacles ${S.obsDeck} · Discard ${S.obsDiscard}</span></div>
+    <div class="dline">${S.line.map(slotArt).join('')}</div>
+    <div class="poolrow">${pool()}<button class="ghost">Undo</button><button class="endturn">End turn</button></div>
+    <div><span class="lbl">Hand</span></div>
+    <div class="dhand">${S.hand.map(id=>`<button class="hc" data-card="${id}">${img(id)}</button>`).join('')}</div></section>
+  <aside class="insp" id="insp">${inspector('prison-door',4)}</aside></div>`;
+}
+/* ---------- C ---------- */
+function strip(item,i){
+  if(item===null) return `<div class="strip gap"><span class="sn">${i+1}</span><span>Empty · disarmed this turn</span></div>`;
+  if(item.down) return `<button class="strip down" data-card="back" data-slot="${i}"><span class="sn">${i+1}</span><span class="nm">Knocked out</span><span style="font-size:11px;color:var(--muted)">leaves silently</span></button>`;
+  const d=D[item]; const cost=[d.c[0], d.c[1]+(S.mods[i]||0)];
+  return `<button class="strip ${i===lastIdx()?'exit':''}" style="${sc(item)}" data-card="${item}" data-slot="${i}"><span class="sn">${i+1}</span>
+    <span class="cost">${badge(cost,36)}${S.mods[i]?`<span class="mod">+${S.mods[i]}</span>`:''}</span>
+    <span class="main"><span class="nm">${d.n} ${ti(d.t)} ${d.mi?'<span class="mi">MISSION ITEM</span>':''}</span>${d.ab?`<span class="ab">${fmt(d.ab)}</span>`:''}<span class="gets">Disarm → ${topSum(d.top)}</span></span>
+    <span>${alarmB(d.a,34)}</span></button>`;
+}
+function cc(id){ const d=D[id], t=d.top; return `<button class="cc" style="${sc(id)}" data-card="${id}"><span class="top">${t.r?badge(t.r,26):''}<b>${t.n}</b>${t.keep?'<i class="kp">KEEP</i>':''}</span><span class="x ${t.x?'':'dim'}">${t.x?fmt(t.x):'Resource only'}</span></button>`; }
+function fc(item,i){
+  if(item===null) return `<div class="fc gap">Empty<br>disarmed</div>`;
+  if(item.down) return `<button class="fc down" data-card="back" data-slot="${i}">Knocked out</button>`;
+  const d=D[item], t=d.top, cost=[d.c[0], d.c[1]+(S.mods[i]||0)];
+  return `<button class="fc ${i===lastIdx()?'exit':''}" style="${sc(item)}" data-card="${item}" data-slot="${i}">
+   <div class="t"><div class="h">${t.r?badge(t.r,22):''}<b>${t.n}</b>${t.keep?'<span class="mi" style="margin-left:auto">KEEP</span>':''}</div>${t.x?`<p>${fmt(t.x)}</p>`:''}</div>
+   <div class="o"><h4>${d.n}</h4>${d.ab?`<p>${fmt(d.ab)}</p>`:''}<div class="ft">${ti(d.t)}${badge(cost,34)}${alarmB(d.a,32)}</div></div>
+   ${S.mods[i]?`<span class="mod">+${S.mods[i]}</span>`:''}${i===lastIdx()?`<span class="xt">Leaves next +${d.a}</span>`:''}</button>`;
+}
+function C_phone(){
+  return `<div class="app C ph">${topbar()}
+  <section class="hud">${goal()}${alarm()}</section>
+  <div class="flow">▼ New obstacles enter here · deck ${S.obsDeck}</div>
+  <section class="conv">${S.line.map(strip).join('')}</section>
+  <div class="flow out">▼ Leaves the line · raises the alarm · discard ${S.obsDiscard}</div>
+  <section class="tray">${pool()}${eqChips()}</section>
+  <section class="hand">${S.hand.map(cc).join('')}</section>
+  <footer class="actions">${piles()}<button class="endturn">End turn</button></footer></div>`;
+}
+function C_desktop(){
+  return `<div class="app C dt">${topbar()}
+  <section class="lrow"><div style="display:flex;justify-content:space-between;gap:12px;align-items:end"><div style="display:grid;gap:6px;max-width:440px">${goal()}</div><div style="width:300px">${alarm()}</div></div>
+    <div style="display:flex;justify-content:space-between"><span class="lbl">Enter · obstacles ${S.obsDeck}</span><span class="lbl">The line</span><span class="lbl">Exit · discard ${S.obsDiscard}</span></div>
+    <div class="cards">${S.line.map(fc).join('')}</div></section>
+  <section class="prow">${pool()}${eqChips()}<span style="margin-left:auto;display:flex;gap:6px">${piles()}</span></section>
+  <section class="hrow">${S.hand.map(cc).join('')}<button class="endturn">End turn</button></section>
+  <aside class="log"><span class="lbl">This turn</span><ol>
+    <li class="mv"><span>Line scroll</span>Guard left the line · alarm +4 → 31</li>
+    <li class="mv"><span>Refill</span>Sniper entered at 2 · Watchtower makes it cost 12</li>
+    <li><span>You played</span>Punch, Punch, Out of Sight · Map and Uniform +2 Stealth</li>
+    <li><span>Interaction 1 of 2</span>Disarmed Yard Door for 4 Stealth → Throw a Rock</li>
+    <li class="al"><span>Next scroll</span>Security Camera leaves · alarm +8 → 39</li></ol>
+    <div style="margin-top:auto;display:flex;gap:8px"><button class="ghost">Undo</button><button class="ghost">Rules</button></div></aside></div>`;
+}
+
+/* ---------- inspector / sheet ---------- */
+function inspector(id, slot){
+  const d=D[id]||{n:id};
+  if(id==='back') return `<img src="cards/480/back.webp" alt=""><div><h3>Knocked out</h3><div class="sub">Face down</div><p class="why">Knocked-out cards have no type or ability. When this one reaches the end of the line it leaves without raising the alarm.</p></div>`;
+  if(slot===undefined){
+    const t=d.top||{};
+    const what = id.startsWith('mission') ? (id==='mission-4'?'Goal: get 18 of any resource and have the Prisoner equipped. Reward: you can interact with up to three obstacles per turn.':'Mission reward, kept in your Equip Area for the rest of the campaign.') : `Play it: ${t.r?'adds '+t.r[1]+(t.r[0]==='s'?' Stealth':' Fight')+' to your pool':''}${t.r&&t.x?' and ':''}${t.x?fmt(t.x):''}`;
+    return `<img src="cards/480/${id}.webp" alt="${d.n}"><div><h3>${t.n||d.n}</h3><div class="sub">${id.startsWith('mission')?'Mission card':'In your hand'}</div><p class="why" style="color:var(--fg)">${what}</p>
+      ${id.startsWith('mission')?'':`<div class="acts"><button class="act go">Play ${t.r?badge(t.r,20):''}<small>goes to the Play Area</small></button>${t.keep?'<button class="act">Equip <small>stays on the table</small></button>':''}</div>`}</div>`;
+  }
+  const cost=[d.c[0], d.c[1]+(S.mods[slot]||0)];
+  const have = cost[0]==='s'?S.pool.s:cost[0]==='f'?S.pool.f:S.pool.s+S.pool.f;
+  const short = Math.max(0,cost[1]-have);
+  const key = d.t==='door';
+  return `<img src="cards/480/${id}.webp" alt="${d.n}"><div><h3>${d.n}</h3><div class="sub">Line position ${slot+1} · ${d.t}</div>
+    <div class="row">Cost ${badge(cost,24)}${S.mods[slot]?'<small style="color:var(--danger)">+2 from Watchtower</small>':''} · Alarm ${alarmB(d.a,22)}</div>
+    <p class="why">${short?`Your pool has ${have}. <b>${short} short.</b>`:'You can afford it.'}${slot===lastIdx()?' Leaves at the end of this turn.':''}</p>
+    <div class="acts">
+      <button class="act" ${short?'disabled':''}>Disarm <small>get ${d.top.n}${d.top.keep?' · KEEP':''}</small></button>
+      <button class="act" ${short?'disabled':''}>Knock out <small>stays face down</small></button>
+      ${key?'<button class="act go">Use Keycard <small>free · counts as an interaction</small></button>':''}
+    </div></div>`;
+}
+function openSheet(app, id, slot){
+  if(app.classList.contains('B') && app.classList.contains('dt')){
+    app.querySelector('#insp').innerHTML = inspector(id, slot);
+    app.querySelectorAll('.slot.sel').forEach(s=>s.classList.remove('sel'));
+    if(slot!==undefined){ const s=app.querySelector(`[data-slot="${slot}"]`); s && s.classList.add('sel'); }
+    return;
+  }
+  const bg=document.createElement('div'); bg.className='sheet-bg';
+  bg.innerHTML=`<div class="sheet" role="dialog" aria-label="${(D[id]||{}).n||''}"><span class="handle"></span>${inspector(id,slot)}</div>`;
+  bg.addEventListener('click',e=>{ if(e.target===bg) bg.remove(); });
+  app.appendChild(bg);
+}
+
+/* ---------- lab wiring ---------- */
+const NOTES = {
+  A:[['A · Tabletop','The table from the rulebook\'s setup diagram, with the original card art everywhere. On phones the line is a sideways carousel with a small overview strip above it.'],
+     ['Strengths',['Feels like the physical game','No redrawn cards to maintain','Desktop shows the whole table at once'],'plus'],
+     ['Weaknesses',['On phones you can\'t see all six obstacles at once, which hurts planning (adjacency, what leaves next)','Ability text needs a tap or hover to read','The equipment drawer is hidden on phones'],'minus']],
+  B:[['B · Wrapped line','Original art, but on phones the line wraps into two rows of three so all six obstacles stay visible and big enough to read names, costs and alarm values. Desktop adds a persistent inspector panel on the right.'],
+     ['Strengths',['Whole line visible on a phone','Faithful art, numbers readable without zooming','Desktop inspector shows what an action costs before you commit'],'plus'],
+     ['Weaknesses',['A wrapped line is less obviously a conveyor belt','Ability text still needs a tap on phones','Desktop cards are smaller to make room for the panel'],'minus']],
+  C:[['C · Vertical conveyor','Built for reading. On phones the line runs top to bottom as rows that include every ability and what disarming gives you, and leaves toward the alarm. The original art appears when you inspect a card. Desktop uses readable redrawn cards and a turn log.'],
+     ['Strengths',['Everything readable with no taps, one-handed in portrait','Space for hints: mission item, cost modifiers, what leaves next','Turn log explains automatic line moves'],'plus'],
+     ['Weaknesses',['Looks least like the physical cards','Every card is redrawn from data, which is more work and more to proofread','The vertical flow differs from the rulebook\'s left-to-right line'],'minus']]
+};
+const R = {A:{phone:A_phone,desktop:A_desktop},B:{phone:B_phone,desktop:B_desktop},C:{phone:C_phone,desktop:C_desktop}};
+const SIZE = {phone:[390,844],desktop:[1366,768]};
+let cur = {c:'A',d:'phone'};
+try{ const saved=JSON.parse(localStorage.getItem('ad-lab')||'null'); if(saved&&R[saved.c]&&SIZE[saved.d]) cur=saved; }catch(e){}
+const dev=document.getElementById('device'), scaler=document.getElementById('scaler');
+function render(){
+  dev.className='device '+cur.d+(dev.classList.contains('full')?' full':'');
+  dev.innerHTML=R[cur.c][cur.d]();
+  if(cur.c==='B'&&cur.d==='desktop'){ const s=dev.querySelector('[data-slot="4"]'); s&&s.classList.add('sel'); }
+  document.querySelectorAll('#concepts button').forEach(b=>b.setAttribute('aria-selected',b.dataset.c===cur.c));
+  document.querySelectorAll('#devices button').forEach(b=>b.setAttribute('aria-selected',b.dataset.d===cur.d));
+  document.getElementById('notes').innerHTML = NOTES[cur.c].map(([h,body,kind])=>`<article class="note"><h3>${h}</h3>${Array.isArray(body)?`<ul>${body.map(x=>`<li class="${kind}">${x}</li>`).join('')}</ul>`:`<p>${body}</p>`}</article>`).join('');
+  try{ localStorage.setItem('ad-lab',JSON.stringify(cur)); }catch(e){}
+  fit();
+}
+function fit(){
+  if(dev.classList.contains('full')) return;
+  const [w,h]=SIZE[cur.d]; const avail=document.querySelector('.stage').clientWidth;
+  const maxH = cur.d==='phone' ? Math.max(560, window.innerHeight-40) : 99999;
+  const s=Math.min(1, avail/w, maxH/h);
+  dev.style.width=w+'px'; dev.style.height=h+'px'; dev.style.transform=`scale(${s})`;
+  scaler.style.width=(w*s)+'px'; scaler.style.height=(h*s)+'px';
+}
+document.getElementById('concepts').addEventListener('click',e=>{const b=e.target.closest('button'); if(b){cur.c=b.dataset.c; render();}});
+document.getElementById('devices').addEventListener('click',e=>{const b=e.target.closest('button'); if(b){cur.d=b.dataset.d; render();}});
+dev.addEventListener('click',e=>{
+  const t=e.target.closest('[data-card]'); if(!t || e.target.closest('.sheet')) return;
+  const app=dev.querySelector('.app'); const slot=t.dataset.slot!==undefined?+t.dataset.slot:undefined;
+  openSheet(app, t.dataset.card, slot);
+});
+document.getElementById('fullbtn').addEventListener('click',()=>{
+  dev.classList.add('full'); dev.style.transform='none';
+  const c=document.createElement('button'); c.className='closefull'; c.textContent='Close'; c.onclick=()=>{dev.classList.remove('full'); c.remove(); fit();};
+  document.body.appendChild(c);
+});
+window.addEventListener('resize',fit);
+render();
+</script>
+
+</html>
