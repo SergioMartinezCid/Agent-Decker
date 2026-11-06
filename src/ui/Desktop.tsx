@@ -76,10 +76,13 @@ export function DesktopLayout({ compact }: { compact: boolean }) {
           <div className="insp-scroll" key={keyForTarget(inspect)}>
             <Inspector target={inspect} />
           </div>
-          <section className="log-box">
-            <span className="lbl">{t('hud.log')}</span>
+          <details className="log-box">
+            <summary className="lbl">
+              <Icon name="chevron" size={14} />
+              {t('hud.log')}
+            </summary>
             <LogList />
-          </section>
+          </details>
         </aside>
       )}
     </div>

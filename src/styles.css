@@ -183,7 +183,13 @@ a { color: var(--fg); }
 .hrow > .hcard { flex: 0 1 calc(var(--hand-h) * 0.708); min-width: 0; }
 .insp-panel { border-left: 1px solid var(--rule); background: var(--bench); display: flex; flex-direction: column; min-height: 0; }
 .insp-scroll { flex: 1 1 auto; overflow: auto; padding: 14px; min-height: 0; }
-.log-box { flex: 0 0 auto; max-height: 34%; overflow: auto; border-top: 1px solid var(--rule); padding: 10px 14px 14px; display: grid; gap: 6px; align-content: start; }
+.log-box { flex: 0 0 auto; max-height: 34%; overflow: auto; border-top: 1px solid var(--rule); padding: 0 14px; }
+.log-box > summary { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: 6px; padding: 10px 0; background: var(--bench); cursor: pointer; list-style: none; user-select: none; }
+.log-box > summary::-webkit-details-marker { display: none; }
+.log-box > summary:hover { color: var(--fg); }
+.log-box > summary svg { transition: transform 0.15s; }
+.log-box[open] > summary svg { transform: rotate(90deg); }
+.log-box .log { padding-bottom: 14px; }
 
 .game.desk.compact {
   --line-h: clamp(84px, 31vh, 230px);
