@@ -38,7 +38,6 @@ export const es: Dict = {
     importSave: 'Importar partida',
     importOk: 'Partida importada.',
     importBad: 'Ese archivo no es una partida guardada de Agent Decker.',
-    exportHint: 'Los navegadores pueden borrar los datos guardados; por ejemplo, Safari tras 7 días sin visitar la página. Exporta un archivo de guardado para tener una copia de seguridad.',
     scenarios: 'Escenarios de prueba',
     scenariosHint: 'Carga una situación preparada para ver cómo se ve. Sustituye a la partida actual.',
   },

@@ -50,7 +50,6 @@ export const en = {
     importSave: 'Import save',
     importOk: 'Save imported.',
     importBad: "That file isn't an Agent Decker save.",
-    exportHint: 'Browsers can delete stored data, for example Safari after 7 days without a visit. Export a save file to keep a backup.',
     scenarios: 'Test scenarios',
     scenariosHint: 'Load a prepared situation to check how it looks. This replaces the current game.',
   },

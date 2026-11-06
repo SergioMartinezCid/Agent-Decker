@@ -144,7 +144,6 @@ function MenuPanel({ onClose }: { onClose: () => void }) {
         {devEnabled() && item(t('menu.scenarios'), () => setOverlay('scenarios'), 'flask')}
         {item(t('start.about'), () => setOverlay('about'), 'info')}
       </div>
-      <p className="muted small">{t('menu.exportHint')}</p>
       <input
         ref={file}
         type="file"
