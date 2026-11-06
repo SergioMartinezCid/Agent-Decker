@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { defOf } from '../engine/cards';
 import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '../engine/engine';
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
@@ -61,7 +62,7 @@ export function DesktopLayout({ compact }: { compact: boolean }) {
           </button>
         </div>
         <div className="lbl hand-head">{t('hud.hand')}</div>
-        <HandRow />
+        <HandRow quick={!compact} />
       </main>
       {compact ? (
         target && (
@@ -153,11 +154,24 @@ function LineCardArt({ lc, slot }: { lc: LineCard; slot: number }) {
   );
 }
 
-function HandRow() {
-  const { game, select, hover, target } = useGame();
+/**
+ * The hand. With `quick` (desktop, where hovering already shows the card in the side
+ * panel), a mouse click does the card's only action straight away. Cards with two
+ * options (Rock or draw, play or equip) and taps on touch screens select the card
+ * instead, so its actions show in the panel.
+ */
+function HandRow({ quick }: { quick: boolean }) {
+  const { game, select, hover, target, playCard, act, animating } = useGame();
   const { top } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
+  const pointer = useRef('mouse');
   useFlip(ref, true, game.hand);
+  const onlyAction = (id: string) => {
+    const pi = playInfo(game, id);
+    if (animating || pi.canPlay === pi.canEquip) return null;
+    if (pi.canPlay) return defOf(id)?.top.effect === 'rockOrDraw' ? null : () => playCard(id);
+    return () => act({ t: 'equip', card: id }) && select(null);
+  };
   return (
     <div className="hrow" ref={ref}>
       {game.hand.map((id) => {
@@ -169,7 +183,16 @@ function HandRow() {
             key={id}
             data-flip={id}
             className={`hcard ${pi.canPlay || pi.canEquip ? 'can' : ''} ${sel ? 'sel' : ''}`}
-            onClick={() => select(me)}
+            onPointerDown={(e) => (pointer.current = e.pointerType)}
+            onClick={(e) => {
+              const touch = pointer.current === 'touch' || pointer.current === 'pen';
+              pointer.current = 'mouse';
+              // Ignore the second click of a double-click: the hand has moved under it.
+              if (e.detail > 1) return;
+              const action = quick && !touch ? onlyAction(id) : null;
+              if (action) action();
+              else select(me);
+            }}
             onPointerEnter={(e) => e.pointerType === 'mouse' && hover(me)}
             onPointerLeave={(e) => e.pointerType === 'mouse' && hover(null)}
             onFocus={() => hover(me)}
