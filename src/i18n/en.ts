@@ -115,7 +115,7 @@ export const en = {
     alarm: 'Alarm',
     watchtower: '+{n} from Watchtower',
     youHave: 'You have {have}.',
-    short: '{n} short.',
+    short: 'You have {have} of the {need} needed.',
     affordable: 'You can pay it.',
     whenDisarmed: 'When disarmed',
     obstacle: 'Obstacle',

@@ -167,7 +167,7 @@ function LineInspector({ slot }: { slot: number }) {
         ) : (
           !usingItem && (
             <p className={`insp-why ${canPay ? 'ok' : 'danger'}`}>
-              {t('insp.youHave', { have })} {canPay ? t('insp.affordable') : t('insp.short', { n: cost[1] - have })}
+              {canPay ? `${t('insp.youHave', { have })} ${t('insp.affordable')}` : t('insp.short', { have, need: cost[1] })}
             </p>
           )
         )}

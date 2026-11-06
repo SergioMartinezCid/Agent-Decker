@@ -103,7 +103,7 @@ export const es: Dict = {
     alarm: 'Alarma',
     watchtower: '+{n} por la Torre de vigilancia',
     youHave: 'Tienes {have}.',
-    short: 'Necesitas {n} más.',
+    short: 'Tienes {have} de los {need} necesarios.',
     affordable: 'Puedes pagarlo.',
     whenDisarmed: 'Al desarmarla',
     obstacle: 'Obstáculo',
