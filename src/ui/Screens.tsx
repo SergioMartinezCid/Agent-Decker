@@ -15,7 +15,7 @@ import {
 } from '../state/store';
 import { Modal, ScoreTable } from './Dialogs';
 import { cardSrc } from './game';
-import { Icon } from './icons';
+import { Icon, type IconName } from './icons';
 import { RulesView } from './RulesView';
 
 const REPO = 'https://github.com/SergioMartinezCid/Agent-Decker';
@@ -125,24 +125,24 @@ export function Overlays() {
 function MenuPanel({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
   const file = useRef<HTMLInputElement>(null);
-  const item = (label: string, fn: () => void, icon?: ReactNode) => (
+  const item = (label: string, fn: () => void, icon: IconName) => (
     <button className="menu-item" onClick={fn}>
-      {icon}
+      <Icon name={icon} />
       {label}
     </button>
   );
   return (
     <Panel title={t('menu.title')} onClose={onClose}>
       <div className="menu-list">
-        {item(t('menu.resume'), onClose)}
-        {item(t('start.rules'), () => setOverlay('rules'), <Icon name="rules" />)}
-        {item(t('start.settings'), () => setOverlay('settings'))}
-        {item(t('start.highScores'), () => setOverlay('scores'))}
-        {item(t('start.about'), () => setOverlay('about'), <Icon name="info" />)}
-        {item(t('menu.exportSave'), exportSave)}
-        {item(t('menu.importSave'), () => file.current?.click())}
-        {devEnabled() && item(t('menu.scenarios'), () => setOverlay('scenarios'))}
-        {item(t('menu.mainMenu'), () => setScreen('start'))}
+        {item(t('menu.resume'), onClose, 'play')}
+        {item(t('menu.mainMenu'), () => setScreen('start'), 'home')}
+        {item(t('start.rules'), () => setOverlay('rules'), 'rules')}
+        {item(t('start.settings'), () => setOverlay('settings'), 'settings')}
+        {item(t('start.highScores'), () => setOverlay('scores'), 'trophy')}
+        {item(t('menu.exportSave'), exportSave, 'download')}
+        {item(t('menu.importSave'), () => file.current?.click(), 'upload')}
+        {devEnabled() && item(t('menu.scenarios'), () => setOverlay('scenarios'), 'flask')}
+        {item(t('start.about'), () => setOverlay('about'), 'info')}
       </div>
       <p className="muted small">{t('menu.exportHint')}</p>
       <input

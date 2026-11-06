@@ -65,7 +65,24 @@ export function TypeIcon({ type, label }: { type: ObstacleType; label?: string }
   );
 }
 
-type IconName = 'menu' | 'undo' | 'rules' | 'close' | 'lock' | 'sound' | 'mute' | 'info' | 'check' | 'cross';
+export type IconName =
+  | 'menu'
+  | 'undo'
+  | 'rules'
+  | 'close'
+  | 'lock'
+  | 'sound'
+  | 'mute'
+  | 'info'
+  | 'check'
+  | 'cross'
+  | 'play'
+  | 'home'
+  | 'settings'
+  | 'trophy'
+  | 'download'
+  | 'upload'
+  | 'flask';
 
 const UI_PATHS: Record<IconName, string> = {
   menu: 'M4 6h16M4 12h16M4 18h16',
@@ -78,6 +95,13 @@ const UI_PATHS: Record<IconName, string> = {
   info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 16v-4M12 8h.01',
   check: 'M20 6 9 17l-5-5',
   cross: 'M6 6l12 12M18 6 6 18',
+  play: 'M7 4.5v15L19.5 12z',
+  home: 'M3 11.5 12 4l9 7.5M5.5 9.5V20h4.5v-5.5h4V20h4.5V9.5',
+  settings: 'M4 7h16M4 17h16M9 4v6M15 14v6',
+  trophy: 'M7 4h10v5a5 5 0 0 1-10 0zM7 6H4.5a3 3 0 0 0 3 3.6M17 6h2.5a3 3 0 0 1-3 3.6M12 14v4M8 20.5h8M9.5 18h5',
+  download: 'M12 4v11M7 10l5 5 5-5M4 20h16',
+  upload: 'M12 15V4M7 9l5-5 5 5M4 20h16',
+  flask: 'M9 3h6M10 3v6l-5.2 9.2A1.9 1.9 0 0 0 6.5 21h11a1.9 1.9 0 0 0 1.7-2.8L14 9V3M7.2 15h9.6',
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
