@@ -20,7 +20,7 @@ The rulebook leaves some situations open. [`docs/rulings.md`](docs/rulings.md) r
 
 ## Development
 
-Requires Node 22 (see `.nvmrc`) and npm 11. npm 10 crashes while installing this dependency tree.
+Requires Node 22.12 or newer (see `.nvmrc`; run `nvm use` in the project folder) and npm 11. npm 10 crashes while installing this dependency tree.
 
 ```sh
 npm install -g npm@11
