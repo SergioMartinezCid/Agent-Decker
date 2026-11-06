@@ -20,10 +20,9 @@ The rulebook leaves some situations open. [`docs/rulings.md`](docs/rulings.md) r
 
 ## Development
 
-Requires Node 22.12 or newer (see `.nvmrc`; run `nvm use` in the project folder) and npm 11. npm 10 crashes while installing this dependency tree.
+Requires Node 26 (see `.nvmrc`; with nvm, run `nvm use` in the project folder).
 
 ```sh
-npm install -g npm@11
 npm install
 npm run dev        # http://localhost:5173/Agent-Decker/
 npm test           # rules engine tests
