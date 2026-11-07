@@ -135,7 +135,7 @@ function LineInspector({ slot }: { slot: number }) {
   };
 
   return (
-    <div className="insp">
+    <div className="insp" data-insp={lc.id}>
       <InspArt id={lc.id} />
       <div className="insp-body">
         <h3>{c.name}</h3>
@@ -202,15 +202,15 @@ function LineInspector({ slot }: { slot: number }) {
 
         <div className="acts">
           {usingItem && <p className="insp-why ok">{t('act.useItemNote')}</p>}
-          <button className="act go" disabled={disabled} onClick={() => run('disarm')}>
+          <button className="act go" data-tut="act-disarm" disabled={disabled} onClick={() => run('disarm')}>
             {t('act.disarm')} <small>{t('act.disarmNote')}</small>
           </button>
           {info?.canEquip && (
-            <button className="act go" disabled={disabled} onClick={() => run('equip')}>
+            <button className="act go" data-tut="act-equip" disabled={disabled} onClick={() => run('equip')}>
               {t('act.disarmEquip')} <small>{t('act.disarmEquipNote')}</small>
             </button>
           )}
-          <button className="act" disabled={disabled} onClick={() => run('knockout')}>
+          <button className="act" data-tut="act-knockout" disabled={disabled} onClick={() => run('knockout')}>
             {t('act.knockout')} <small>{t('act.knockoutNote')}</small>
           </button>
           {info?.clumsyTargets.map((j) => (
@@ -236,7 +236,7 @@ function HandInspector({ id }: { id: string }) {
   const item = tp.item;
   const dis = animating;
   return (
-    <div className="insp">
+    <div className="insp" data-insp={id}>
       <InspArt id={id} />
       <div className="insp-body">
         <h3>{top(id)}</h3>
@@ -255,7 +255,7 @@ function HandInspector({ id }: { id: string }) {
         <div className="acts">
           {pi.canPlay && tp.effect === 'rockOrDraw' && (
             <>
-              <button className="act go" disabled={dis} onClick={() => playCard(id, { choice: 'fight' })}>
+              <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id, { choice: 'fight' })}>
                 <Rich text={t('act.playFight')} />
               </button>
               <button className="act go" disabled={dis} onClick={() => playCard(id, { choice: 'draw' })}>
@@ -264,13 +264,14 @@ function HandInspector({ id }: { id: string }) {
             </>
           )}
           {pi.canPlay && tp.effect !== 'rockOrDraw' && (
-            <button className="act go" disabled={dis} onClick={() => playCard(id)}>
+            <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id)}>
               {tp.res ? <Rich text={t('act.playRes', { res: `{${tp.res[0]}${tp.res[1]}}` })} /> : t('act.play')}
             </button>
           )}
           {pi.canEquip && (
             <button
               className="act go"
+              data-tut="act-equip"
               disabled={dis}
               onClick={() => {
                 if (act({ t: 'equip', card: id })) select(null);

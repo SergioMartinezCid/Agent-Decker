@@ -6,10 +6,12 @@ import {
   importSave,
   loadState,
   newGame,
+  openTutorial,
   setOverlay,
   setScreen,
   setSettings,
   showToast,
+  startTutorial,
   useApp,
   type Overlay,
 } from '../state/store';
@@ -22,6 +24,9 @@ const REPO = 'https://github.com/SergioMartinezCid/Agent-Decker';
 
 export function StartScreen() {
   const saved = useApp((s) => s.saved);
+  const tutorial = useApp((s) => !!s.tutorial);
+  // First visit: nothing played yet, so the tutorial is the suggested start.
+  const firstVisit = useApp((s) => !s.saved && !s.tutorial && !s.settings.tutorialSeen && !s.highScores.length);
   const { t } = useI18n();
   const [confirm, setConfirm] = useState(false);
   const inProgress = saved && (saved.game.phase === 'play' || saved.game.phase === 'missionComplete');
@@ -39,9 +44,21 @@ export function StartScreen() {
               <small>{t('start.continueInfo', { mission: saved.game.mission, turn: saved.game.turn, alarm: saved.game.alarm })}</small>
             </button>
           )}
-          <button className={saved ? 'ghost big' : 'primary big'} onClick={() => (inProgress ? setConfirm(true) : newGame())}>
+          {firstVisit && (
+            <button className="primary big" onClick={openTutorial}>
+              {t('start.tutorial')}
+              <small>{t('start.tutorialInfo')}</small>
+            </button>
+          )}
+          <button className={saved || firstVisit ? 'ghost big' : 'primary big'} onClick={() => (inProgress ? setConfirm(true) : newGame())}>
             {t('start.newCampaign')}
           </button>
+          {!firstVisit && (
+            <button className="ghost" onClick={openTutorial}>
+              <Icon name="school" />
+              {tutorial ? t('start.tutorialContinue') : t('start.tutorial')}
+            </button>
+          )}
           <div className="start-row">
             <button className="ghost" onClick={() => setOverlay('rules')}>
               {t('start.rules')}
@@ -125,12 +142,28 @@ export function Overlays() {
 function MenuPanel({ onClose }: { onClose: () => void }) {
   const { t } = useI18n();
   const file = useRef<HTMLInputElement>(null);
+  const tutorial = useApp((s) => s.screen === 'tutorial');
   const item = (label: string, fn: () => void, icon: IconName) => (
     <button className="menu-item" onClick={fn}>
       <Icon name={icon} />
       {label}
     </button>
   );
+  if (tutorial) {
+    return (
+      <Panel title={t('menu.title')} onClose={onClose}>
+        <div className="menu-list">
+          {item(t('menu.resumeTutorial'), onClose, 'play')}
+          {item(t('menu.restartTutorial'), startTutorial, 'undo')}
+          {item(t('menu.leaveTutorial'), () => setScreen('start'), 'home')}
+          {item(t('start.rules'), () => setOverlay('rules'), 'rules')}
+          {item(t('start.settings'), () => setOverlay('settings'), 'settings')}
+          {item(t('start.about'), () => setOverlay('about'), 'info')}
+        </div>
+        <p className="muted small">{t('menu.tutorialNote')}</p>
+      </Panel>
+    );
+  }
   return (
     <Panel title={t('menu.title')} onClose={onClose}>
       <div className="menu-list">

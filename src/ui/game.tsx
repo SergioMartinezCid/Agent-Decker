@@ -50,6 +50,8 @@ export interface GameUI {
   endTurn: () => void;
   undo: () => void;
   canUndo: boolean;
+  /** Playing the tutorial rather than the campaign. */
+  tutorial: boolean;
   openMenu: () => void;
   openRules: () => void;
   /** Show a card full screen. */
@@ -81,7 +83,7 @@ export function AlarmMeter({ compact }: { compact?: boolean }) {
   const pct = Math.min(100, view.alarm * 2);
   const level = view.alarm >= 40 ? 'hot' : view.alarm >= 25 ? 'warm' : 'cool';
   return (
-    <div className={`am ${compact ? 'am-compact' : ''} am-${level}`} role="meter" aria-valuemin={0} aria-valuemax={50} aria-valuenow={view.alarm} aria-label={t('hud.alarm')}>
+    <div className={`am ${compact ? 'am-compact' : ''} am-${level}`} data-tut="alarm" role="meter" aria-valuemin={0} aria-valuemax={50} aria-valuenow={view.alarm} aria-label={t('hud.alarm')}>
       <div className="am-num">
         {view.alarm}
         <span>/50</span>
@@ -128,7 +130,7 @@ export function GoalStatus({ compact }: { compact?: boolean }) {
   if (st.hand) parts.push(<span key="hand" className={`gp ${st.hand.have >= st.hand.need ? 'ok' : ''}`}>{t('hud.goalHand', st.hand)}</span>);
   if (st.down) parts.push(<span key="down" className={`gp ${st.down.have >= st.down.need ? 'ok' : ''}`}>{t('hud.goalDown', st.down)}</span>);
   return (
-    <button className={`goal ${compact ? 'goal-compact' : ''} ${st.ok ? 'goal-ready' : ''}`} onClick={() => select({ kind: 'mission' })}>
+    <button className={`goal ${compact ? 'goal-compact' : ''} ${st.ok ? 'goal-ready' : ''}`} data-tut="goal" onClick={() => select({ kind: 'mission' })}>
       <span className="goal-k">{t('hud.goal')}</span>
       <span className="goal-text">
         <Rich text={m.goal} size={compact ? 22 : 26} />
@@ -143,7 +145,7 @@ export function PoolView() {
   const { t } = useI18n();
   const max = interactionLimit(game);
   return (
-    <div className="pool" aria-label={t('hud.resources')}>
+    <div className="pool" data-tut="pool" aria-label={t('hud.resources')}>
       <span className={`pl ${game.pool.s ? '' : 'zero'}`}>
         <Badge kind="s" size={22} label={t('res.s')} />
         {game.pool.s}
@@ -182,7 +184,7 @@ export function Piles({ show = ['deck', 'discard', 'play'] }: { show?: Pile[] })
   return (
     <>
       {show.map((p) => (
-        <button key={p} className="pile" onClick={() => select({ kind: 'pile', pile: p })}>
+        <button key={p} className="pile" data-tut={`pile-${p}`} onClick={() => select({ kind: 'pile', pile: p })}>
           <span>{label[p]}</span>
           <b>{count[p]}</b>
         </button>
@@ -240,7 +242,7 @@ export function LogList({ limit = 30 }: { limit?: number }) {
 }
 
 export function TopBar({ children }: { children?: ReactNode }) {
-  const { game, openMenu, openRules } = useGame();
+  const { game, openMenu, openRules, tutorial } = useGame();
   const { t } = useI18n();
   return (
     <header className="tb">
@@ -250,7 +252,7 @@ export function TopBar({ children }: { children?: ReactNode }) {
       <span className="logo" aria-hidden="true">
         AGENT<b>DECKER</b>
       </span>
-      <span className="chip">{t('hud.mission', { n: game.mission })}</span>
+      <span className={`chip ${tutorial ? 'chip-tut' : ''}`}>{tutorial ? t('tut.title') : t('hud.mission', { n: game.mission })}</span>
       {children}
       <button className="ib" onClick={openRules} aria-label={t('hud.rules')}>
         <Icon name="rules" />

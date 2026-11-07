@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { defOf } from '../engine/cards';
+import { defOf, keyOf } from '../engine/cards';
 import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '../engine/engine';
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
@@ -21,6 +21,7 @@ export function DesktopLayout({ compact }: { compact: boolean }) {
       <aside className="side">
         <button
           className="mission-card"
+          data-tut="mission"
           onClick={() => select({ kind: 'mission' })}
           onPointerEnter={(e) => e.pointerType === 'mouse' && hover({ kind: 'mission' })}
           onPointerLeave={(e) => e.pointerType === 'mouse' && hover(null)}
@@ -54,10 +55,10 @@ export function DesktopLayout({ compact }: { compact: boolean }) {
         <div className="bar">
           <PoolView />
           <span className="spacer" />
-          <button className="ghost" onClick={undo} disabled={!canUndo}>
+          <button className="ghost" data-tut="undo" onClick={undo} disabled={!canUndo}>
             <Icon name="undo" /> {t('hud.undo')}
           </button>
-          <button className="endturn" onClick={endTurn} disabled={animating || game.phase !== 'play' || !!game.pending}>
+          <button className="endturn" data-tut="end-turn" onClick={endTurn} disabled={animating || game.phase !== 'play' || !!game.pending}>
             {t('hud.endTurn')}
           </button>
         </div>
@@ -96,7 +97,7 @@ function LineRow() {
   const ref = useRef<HTMLDivElement>(null);
   useFlip(ref, true, view.line);
   return (
-    <div className="lrow" ref={ref}>
+    <div className="lrow" data-tut="line" ref={ref}>
       {view.line.map((lc, i) =>
         lc ? (
           <LineCardArt key={lc.id} lc={lc} slot={i} />
@@ -129,6 +130,8 @@ function LineCardArt({ lc, slot }: { lc: LineCard; slot: number }) {
   return (
     <button
       data-flip={lc.id}
+      data-tut="line-card"
+      data-id={lc.id}
       className={`lcard ${lc.down ? 'down' : ''} ${can ? 'can' : ''} ${sel ? 'sel' : ''}`}
       onClick={() => select(me)}
       onPointerEnter={(e) => e.pointerType === 'mouse' && hover(me)}
@@ -173,7 +176,7 @@ function HandRow({ quick }: { quick: boolean }) {
     return () => act({ t: 'equip', card: id }) && select(null);
   };
   return (
-    <div className="hrow" ref={ref}>
+    <div className="hrow" data-tut="hand" ref={ref}>
       {game.hand.map((id) => {
         const me: Target = { kind: 'hand', id };
         const pi = playInfo(game, id);
@@ -182,6 +185,9 @@ function HandRow({ quick }: { quick: boolean }) {
           <button
             key={id}
             data-flip={id}
+            data-tut="hand-card"
+            data-id={id}
+            data-card={keyOf(id)}
             className={`hcard ${pi.canPlay || pi.canEquip ? 'can' : ''} ${sel ? 'sel' : ''}`}
             onPointerDown={(e) => (pointer.current = e.pointerType)}
             onClick={(e) => {

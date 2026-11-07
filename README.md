@@ -5,6 +5,7 @@ An unofficial web adaptation of **[Agent Decker](https://gr9yfox.itch.io/agent-d
 **Play:** <https://sergiomartinezcid.github.io/Agent-Decker/>
 
 - The full five-mission campaign with all 54 cards. Every rule is enforced and all line movement is automatic.
+- A tutorial: a practice mission on a prepared deal. A coach guides your first two turns, then gives tips while you finish the mission. It keeps its own game, so it never touches your campaign.
 - Works on desktop and on phones (portrait or landscape).
 - Installable and playable offline (PWA). Progress is saved in your browser after every action. Save files can be exported and imported.
 - Undo within a turn, until a draw or shuffle reveals new cards.
@@ -41,6 +42,7 @@ Add `?dev` to the URL to get **Test scenarios** in the in-game menu. These are p
 | `src/ui/` | React UI. `Desktop.tsx` is the desktop layout (side inspector, compact landscape mode); `Phone.tsx` is the phone layout (vertical conveyor). |
 | `src/i18n/`, `src/content/` | Strings and rules text in English and Spanish |
 | `src/audio/sfx.ts` | Synthesized sound effects |
+| `src/tutorial/script.ts` | The tutorial's prepared deal, the coach's steps and its tips |
 | `scripts/` | Python scripts that cut card images and diagrams out of the PDFs and draw the app icons (`npm run assets`, needs `pymupdf` and `Pillow`) |
 | `design/layout-lab/` | The layout mockups the UI was chosen from |
 | `docs/rulings.md` | Rule clarifications and their sources |

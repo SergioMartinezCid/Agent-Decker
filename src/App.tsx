@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { I18nProvider, useI18n } from './i18n';
-import { useApp } from './state/store';
+import { activeSaved, useApp } from './state/store';
 import { GameScreen } from './ui/GameScreen';
 import { Overlays, StartScreen } from './ui/Screens';
 
@@ -19,10 +19,10 @@ export function App() {
 
 function Shell() {
   const screen = useApp((s) => s.screen);
-  const hasSave = useApp((s) => !!s.saved);
+  const hasGame = useApp((s) => !!activeSaved(s));
   return (
     <>
-      {screen === 'game' && hasSave ? <GameScreen /> : <StartScreen />}
+      {screen !== 'start' && hasGame ? <GameScreen key={screen} /> : <StartScreen />}
       <Overlays />
       <Toast />
       <UpdatePrompt />

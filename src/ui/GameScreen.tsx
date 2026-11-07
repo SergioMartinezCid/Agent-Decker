@@ -3,7 +3,8 @@ import { defOf } from '../engine/cards';
 import { missionStatus } from '../engine/engine';
 import type { Action } from '../engine/types';
 import { useI18n } from '../i18n';
-import { dispatch, setOverlay, undo, useApp } from '../state/store';
+import { activeSaved, dispatch, isGuided, setOverlay, undo, useApp } from '../state/store';
+import { Coach } from './Coach';
 import { DesktopLayout } from './Desktop';
 import { CardZoom, ChoiceDialog, PendingDialog, PhaseModal } from './Dialogs';
 import { GameProvider, sameTarget, type ChoiceSpec, type GameUI, type Target } from './game';
@@ -11,7 +12,9 @@ import { useLayoutMode } from './hooks';
 import { PhoneLayout } from './Phone';
 
 export function GameScreen() {
-  const saved = useApp((s) => s.saved)!;
+  const saved = useApp(activeSaved)!;
+  const tutorial = useApp((s) => s.screen === 'tutorial');
+  const guided = useApp(isGuided);
   const anim = useApp((s) => s.anim);
   const mode = useLayoutMode();
   const { t } = useI18n();
@@ -162,7 +165,8 @@ export function GameScreen() {
     playCard,
     endTurn,
     undo,
-    canUndo: saved.undo.length > 0 && !anim,
+    canUndo: saved.undo.length > 0 && !anim && !guided,
+    tutorial,
     openMenu: () => setOverlay('menu'),
     openRules: () => setOverlay('rules'),
     zoom: setZoomed,
@@ -175,6 +179,7 @@ export function GameScreen() {
       {!anim && <PendingDialog />}
       <PhaseModal />
       {zoomed && <CardZoom id={zoomed} onClose={() => setZoomed(null)} />}
+      {tutorial && <Coach />}
     </GameProvider>
   );
 }

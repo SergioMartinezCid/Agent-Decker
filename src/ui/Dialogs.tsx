@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { MISSIONS, keyOf } from '../engine/cards';
 import { useI18n } from '../i18n';
-import { dispatch, newGame, retryMission, setScreen } from '../state/store';
+import { dispatch, finishTutorial, newGame, retryMission, retryTutorial, setScreen, useApp } from '../state/store';
 import { CardImg, cardSrc, useGame, type ChoiceSpec } from './game';
 import { Icon } from './icons';
 import { Rich } from './Rich';
@@ -216,9 +216,10 @@ export function PendingDialog() {
 }
 
 export function PhaseModal() {
-  const { game, animating } = useGame();
+  const { game, animating, tutorial } = useGame();
   const { t, d } = useI18n();
   if (animating) return null;
+  if (tutorial) return <TutorialEnd />;
   if (game.phase === 'missionComplete') {
     const n = game.mission;
     const m = d.missions[n];
@@ -265,6 +266,55 @@ export function PhaseModal() {
     );
   }
   if (game.phase === 'won') return <WonModal />;
+  return null;
+}
+
+/** The end of the tutorial game: mission complete, or caught. */
+function TutorialEnd() {
+  const { game } = useGame();
+  const { t, d } = useI18n();
+  const campaign = useApp((s) => s.saved?.game);
+  const inCampaign = !!campaign && (campaign.phase === 'play' || campaign.phase === 'missionComplete');
+  if (game.phase === 'missionComplete') {
+    return (
+      <Modal label={t('tut.doneTitle')} className="phase">
+        <div className="phase-art">
+          <CardImg id="mission-1" size={480} />
+        </div>
+        <h2>{t('tut.doneTitle')}</h2>
+        <p className="big">{t('tut.doneText', { alarm: game.scores[0] })}</p>
+        <p>
+          <Rich text={t('tut.doneNext', { reward: d.missions[1].reward })} />
+        </p>
+        <div className="modal-acts">
+          <button className="ghost" onClick={() => finishTutorial('start')}>
+            {t('menu.mainMenu')}
+          </button>
+          <button className="primary" onClick={() => finishTutorial('campaign')}>
+            {inCampaign ? t('tut.backToCampaign') : t('tut.playCampaign')}
+          </button>
+        </div>
+      </Modal>
+    );
+  }
+  if (game.phase === 'gameOver') {
+    const alarm = game.gameOver === 'alarm';
+    return (
+      <Modal label={t(alarm ? 'modal.gameOverAlarm' : 'modal.gameOverTime')} className="phase danger">
+        <h2>{t(alarm ? 'modal.gameOverAlarm' : 'modal.gameOverTime')}</h2>
+        <p className="big">{t(alarm ? 'modal.gameOverAlarmText' : 'modal.gameOverTimeText')}</p>
+        <p className="muted">{t('tut.retryNote')}</p>
+        <div className="modal-acts">
+          <button className="ghost" onClick={() => finishTutorial('start')}>
+            {t('tut.leave')}
+          </button>
+          <button className="primary" onClick={retryTutorial}>
+            {t('tut.retry')}
+          </button>
+        </div>
+      </Modal>
+    );
+  }
   return null;
 }
 

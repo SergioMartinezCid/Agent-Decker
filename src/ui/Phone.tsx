@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { defOf } from '../engine/cards';
+import { defOf, keyOf } from '../engine/cards';
 import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '../engine/engine';
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
@@ -35,10 +35,10 @@ export function PhoneLayout() {
       <footer className="pbar">
         <Piles />
         <span className="spacer" />
-        <button className="ib" onClick={undo} disabled={!canUndo} aria-label={t('hud.undo')}>
+        <button className="ib" data-tut="undo" onClick={undo} disabled={!canUndo} aria-label={t('hud.undo')}>
           <Icon name="undo" />
         </button>
-        <button className="endturn" onClick={endTurn} disabled={animating || game.phase !== 'play' || !!game.pending}>
+        <button className="endturn" data-tut="end-turn" onClick={endTurn} disabled={animating || game.phase !== 'play' || !!game.pending}>
           {t('hud.endTurn')}
         </button>
       </footer>
@@ -58,7 +58,7 @@ function Conveyor() {
   const ref = useRef<HTMLDivElement>(null);
   useFlip(ref, true, view.line);
   return (
-    <div className="conv" ref={ref}>
+    <div className="conv" data-tut="line" ref={ref}>
       {view.line.map((lc, i) => (lc ? <Row key={lc.id} lc={lc} slot={i} /> : <GapRow key={`g${i}`} slot={i} />))}
     </div>
   );
@@ -84,7 +84,7 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const last = rightmost(view.line) === slot;
   if (lc.down) {
     return (
-      <button data-flip={lc.id} className="row down" onClick={() => select({ kind: 'line', slot })}>
+      <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className="row down" onClick={() => select({ kind: 'line', slot })}>
         <span className="row-n">{slot + 1}</span>
         <CardImg id={lc.id} down className="row-art" />
         <span className="row-main">
@@ -104,7 +104,7 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const locked = info && (info.blocked === 'sniper' || info.blocked === 'hawk');
   const top = defOf(lc.id)?.top;
   return (
-    <button data-flip={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''}`} onClick={() => select({ kind: 'line', slot })}>
+    <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''}`} onClick={() => select({ kind: 'line', slot })}>
       <span className="row-n">{slot + 1}</span>
       <CardImg id={lc.id} className="row-art" />
       <span className="row-main">
@@ -141,11 +141,11 @@ function HandStrip() {
   const ref = useRef<HTMLDivElement>(null);
   useFlip(ref, true, game.hand);
   return (
-    <div className="hstrip" ref={ref} style={{ ['--n' as string]: Math.max(1, game.hand.length) }}>
+    <div className="hstrip" data-tut="hand" ref={ref} style={{ ['--n' as string]: Math.max(1, game.hand.length) }}>
       {game.hand.map((id) => {
         const pi = playInfo(game, id);
         return (
-          <button key={id} data-flip={id} className={`hcard ${pi.canPlay || pi.canEquip ? 'can' : ''}`} onClick={() => select({ kind: 'hand', id })} aria-label={top(id)}>
+          <button key={id} data-flip={id} data-tut="hand-card" data-id={id} data-card={keyOf(id)} className={`hcard ${pi.canPlay || pi.canEquip ? 'can' : ''}`} onClick={() => select({ kind: 'hand', id })} aria-label={top(id)}>
             <CardImg id={id} />
           </button>
         );

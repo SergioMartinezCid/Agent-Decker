@@ -367,6 +367,25 @@ a { color: var(--fg); }
 .gallery-card { border: 0; padding: 0; background: transparent; display: grid; gap: 4px; text-align: center; font-size: 12px; color: var(--muted); }
 .gallery-card img { width: 100%; border-radius: 5%; display: block; }
 
+/* ---------- tutorial coach ---------- */
+.coach { position: fixed; left: 0; top: 0; z-index: 70; width: min(360px, calc(100vw - 20px)); background: var(--panel-2); border: 1px solid var(--keep); border-radius: 14px; padding: 10px 14px 12px; box-shadow: 0 16px 44px #000c; }
+.coach-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.coach-head .lbl { color: var(--keep); }
+.coach-leave { border: 0; background: transparent; color: var(--muted); font-size: 13px; padding: 2px 0 2px 6px; text-decoration: underline dotted; text-underline-offset: 3px; }
+.coach-leave:hover { color: var(--fg); }
+.coach-text { animation: coach-in 0.25s ease-out; }
+.coach-text p { margin: 6px 0 0; font-size: 15px; line-height: 1.45; text-wrap: pretty; }
+.coach-text .bd { vertical-align: -0.4em; margin: -3px 1px; }
+.coach-acts { display: flex; justify-content: flex-end; align-items: center; margin-top: 10px; min-height: 22px; }
+.coach-acts .primary { padding: 7px 16px; }
+.coach-do { display: inline-flex; align-items: center; gap: 6px; font-family: var(--display); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 13px; color: var(--keep); }
+.coach-dim { position: fixed; inset: 0; z-index: 69; background: #0009; pointer-events: none; }
+.tut-rings { position: fixed; inset: 0; z-index: 68; pointer-events: none; }
+.tut-ring { position: fixed; border: 3px solid var(--keep); border-radius: 12px; box-shadow: 0 0 0 4px #ffe11a33, 0 0 22px #ffe11a88; animation: ring-pulse 1.3s ease-in-out infinite; }
+@keyframes ring-pulse { 50% { box-shadow: 0 0 0 9px #ffe11a11, 0 0 30px #ffe11aaa; } }
+@keyframes coach-in { from { opacity: 0; transform: translateY(4px); } }
+.chip-tut { color: #111; background: var(--keep); border-color: var(--keep); }
+
 .toast { position: fixed; z-index: 80; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--panel-2); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 30px #000a; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); }
 
 @media (max-width: 1440px) {
