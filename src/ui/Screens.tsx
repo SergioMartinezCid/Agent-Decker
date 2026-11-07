@@ -220,6 +220,21 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
         <LangSwitch />
       </div>
       <Toggle label={t('settings.sound')} value={settings.sound} onChange={(sound) => setSettings({ sound })} />
+      <Toggle label={t('settings.music')} value={settings.music} onChange={(music) => setSettings({ music })} />
+      <div className="setting">
+        <label htmlFor="music-volume">{t('settings.musicVolume')}</label>
+        <input
+          id="music-volume"
+          className="range"
+          type="range"
+          min={0}
+          max={100}
+          step={5}
+          value={Math.round(settings.musicVolume * 100)}
+          disabled={!settings.music}
+          onChange={(e) => setSettings({ musicVolume: Number(e.target.value) / 100 })}
+        />
+      </div>
       <Toggle label={t('settings.animations')} value={settings.anim} onChange={(anim) => setSettings({ anim })} />
     </Panel>
   );

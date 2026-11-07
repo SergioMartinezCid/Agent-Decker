@@ -52,6 +52,8 @@ export const es: Dict = {
     title: 'Ajustes',
     language: 'Idioma',
     sound: 'Efectos de sonido',
+    music: 'Música',
+    musicVolume: 'Volumen de la música',
     animations: 'Animaciones',
   },
   res: { s: 'Sigilo', f: 'Combate', a: 'Cualquiera' },

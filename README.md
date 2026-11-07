@@ -11,7 +11,7 @@ An unofficial web adaptation of **[Agent Decker](https://gr9yfox.itch.io/agent-d
 - Undo within a turn, until a draw or shuffle reveals new cards.
 - English and Spanish.
 - The rulebook, a clarifications FAQ and a card gallery inside the app.
-- Sound effects, synthesized in the browser.
+- Sound effects and background music, synthesized in the browser. The music is composed as it plays and gets tenser as the alarm rises.
 
 > Agent Decker by Manuel Correia is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License. This adaptation is free, non-commercial and not endorsed by the designer. See [CONTENT-LICENSE.md](CONTENT-LICENSE.md).
 
@@ -41,7 +41,7 @@ Add `?dev` to the URL to get **Test scenarios** in the in-game menu. These are p
 | `src/state/store.ts` | App state: autosave, undo checkpoints, mission retry, high scores, end-of-turn animation |
 | `src/ui/` | React UI. `Desktop.tsx` is the desktop layout (side inspector, compact landscape mode); `Phone.tsx` is the phone layout (vertical conveyor). |
 | `src/i18n/`, `src/content/` | Strings and rules text in English and Spanish |
-| `src/audio/sfx.ts` | Synthesized sound effects |
+| `src/audio/` | Synthesized sound effects (`sfx.ts`) and procedural music (`music.ts`; `director.ts` picks its mood from the game) |
 | `src/tutorial/script.ts` | The tutorial's prepared deal, the coach's steps and its tips |
 | `scripts/` | Python scripts that cut card images and diagrams out of the PDFs and draw the app icons (`npm run assets`, needs `pymupdf` and `Pillow`) |
 | `design/layout-lab/` | The layout mockups the UI was chosen from |

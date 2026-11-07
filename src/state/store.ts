@@ -18,6 +18,9 @@ export interface Saved {
 export interface Settings {
   lang: Lang;
   sound: boolean;
+  music: boolean;
+  /** 0–1. */
+  musicVolume: number;
   anim: boolean;
   /** The player has started the tutorial at least once (the start screen stops pushing it). */
   tutorialSeen: boolean;
@@ -99,6 +102,8 @@ function initialState(): AppState {
   const settings: Settings = {
     lang: 'en',
     sound: true,
+    music: true,
+    musicVolume: 0.6,
     anim: !prefersReduced(),
     tutorialSeen: false,
     ...(read<Partial<Settings>>(KEY_SETTINGS) ?? {}),
@@ -129,6 +134,12 @@ function set(patch: Partial<AppState>) {
   if ('highScores' in patch) write(KEY_SCORES, state.highScores);
   if ('tutorial' in patch) write(KEY_TUTORIAL, state.tutorial);
   listeners.forEach((l) => l());
+}
+
+/** Calls `fn` after every change to the app state. Returns the unsubscribe function. */
+export function subscribe(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
 }
 
 export function useApp<T>(select: (s: AppState) => T): T {

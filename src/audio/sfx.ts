@@ -25,22 +25,27 @@ export function setSoundEnabled(on: boolean) {
   enabled = on;
 }
 
-function ac(): AudioContext | null {
-  if (!enabled) return null;
+/** The audio context shared by sound effects and music, created on first use. */
+export function audioContext(): AudioContext | null {
   try {
     if (!ctx) {
       const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (!AC) return null;
       ctx = new AC();
     }
-    if (ctx.state === 'suspended') void ctx.resume();
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
     return ctx;
   } catch {
     return null;
   }
 }
 
-function noise(c: AudioContext): AudioBuffer {
+function ac(): AudioContext | null {
+  return enabled ? audioContext() : null;
+}
+
+/** Half a second of white noise, shared by the effects and the music's percussion. */
+export function noise(c: BaseAudioContext): AudioBuffer {
   if (noiseBuf && noiseBuf.sampleRate === c.sampleRate) return noiseBuf;
   const len = Math.floor(c.sampleRate * 0.6);
   noiseBuf = c.createBuffer(1, len, c.sampleRate);

@@ -385,6 +385,7 @@ a { color: var(--fg); }
 @keyframes ring-pulse { 50% { box-shadow: 0 0 0 9px #ffe11a11, 0 0 30px #ffe11aaa; } }
 @keyframes coach-in { from { opacity: 0; transform: translateY(4px); } }
 .chip-tut { color: #111; background: var(--keep); border-color: var(--keep); }
+.range { accent-color: var(--keep); width: min(240px, 55vw); }
 
 .toast { position: fixed; z-index: 80; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--panel-2); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 30px #000a; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); }
 

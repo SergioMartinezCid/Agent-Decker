@@ -64,6 +64,8 @@ export const en = {
     title: 'Settings',
     language: 'Language',
     sound: 'Sound effects',
+    music: 'Music',
+    musicVolume: 'Music volume',
     animations: 'Animations',
   },
   res: { s: 'Stealth', f: 'Fight', a: 'Any' },
