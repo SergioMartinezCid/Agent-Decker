@@ -417,6 +417,12 @@ a { color: var(--fg); }
 .chip-tut { color: #111; background: var(--keep); border-color: var(--keep); }
 .range { accent-color: var(--keep); width: min(240px, 55vw); }
 
+/* ---------- phone card sheet: cost meter ---------- */
+.insp-meter { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.meter { flex: 1 1 60px; height: 8px; border-radius: 4px; background: #ffffff1a; overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--danger); border-radius: 4px; }
+.meter.ok i { background: var(--ok); }
+.meter-n { font-family: var(--display); font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
 /* ---------- line marks ---------- */
 .mk { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #000a; box-shadow: inset 0 0 0 1px currentColor; flex: none; color: var(--muted); }
 .mk-burn { color: #ff9a3c; }

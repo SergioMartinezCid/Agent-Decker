@@ -3,6 +3,7 @@ import { defOf, ITEM_TARGET, keyOf, missionDef } from '../engine/cards';
 import { defaultPayment, equipBonus, interactInfo, missionStatus, playInfo, rightmost } from '../engine/engine';
 import { useI18n } from '../i18n';
 import { AlarmBadge, Badge, CardImg, MarkIcon, useGame, useLineMarks, usePeek, type Target } from './game';
+import { useLayoutMode } from './hooks';
 import { Icon } from './icons';
 import { Rich } from './Rich';
 
@@ -76,9 +77,21 @@ function CardInfo({ id, sub }: { id: string; sub: string }) {
 
 // ---------------------------------------------------------------- line
 
+/**
+ * The phone's card sheet is short: actions first, a cost meter instead of a sentence, and
+ * button notes only while learning (the tutorial and Mission 1). The desktop panel has room
+ * for the long version.
+ */
+function useShortSheet() {
+  const { game, tutorial } = useGame();
+  const short = useLayoutMode() === 'phone';
+  return { short, notes: !short || tutorial || game.mission === 1 };
+}
+
 function LineInspector({ slot }: { slot: number }) {
   const { game, view, act, select, animating } = useGame();
   const { t, card, top } = useI18n();
+  const { short, notes } = useShortSheet();
   const lc = view.line[slot];
   const info = interactInfo(game, slot);
   const def = lc ? defOf(lc.id) : undefined;
@@ -141,92 +154,145 @@ function LineInspector({ slot }: { slot: number }) {
     if (act({ t: 'interact', slot, pay: payment, outcome, target })) select(null);
   };
 
+  const header = (
+    <>
+      <h3>{c.name}</h3>
+      <div className="insp-sub">
+        {t('insp.position', { n: slot + 1 })} · {t(`types.${ob.type}`)}
+      </div>
+    </>
+  );
+  const costs = short ? (
+    <div className="insp-meter">
+      <Badge kind={cost[0]} n={cost[1]} size={30} label={`${t('insp.cost')} ${cost[1]}`} />
+      <span className={`meter ${canPay ? 'ok' : ''}`} role="meter" aria-valuemin={0} aria-valuemax={cost[1]} aria-valuenow={Math.min(have, cost[1])}>
+        <i style={{ width: `${Math.min(100, (have / Math.max(1, cost[1])) * 100)}%` }} />
+      </span>
+      <span className="meter-n">
+        {have}/{cost[1]}
+      </span>
+      <AlarmBadge n={ob.alarm} size={28} label={`${t('insp.alarm')} ${ob.alarm}`} />
+      {mod > 0 && <small className="warn">{t('insp.watchtower', { n: mod })}</small>}
+    </div>
+  ) : (
+    <div className="insp-row insp-costs">
+      <span>{t('insp.cost')}</span>
+      <Badge kind={cost[0]} n={cost[1]} size={28} />
+      {mod > 0 && <small className="warn">{t('insp.watchtower', { n: mod })}</small>}
+      <span className="sep" />
+      <span>{t('insp.alarm')}</span>
+      <AlarmBadge n={ob.alarm} size={26} />
+    </div>
+  );
+  const ability = c.ability && (
+    <p className="insp-ability">
+      <Rich text={c.ability} />
+    </p>
+  );
+  const gets = (
+    <div className="insp-gets">
+      <span className="lbl">{t('insp.whenDisarmed')}</span>
+      <TopText id={lc.id} />
+    </div>
+  );
+  const leaving = isLast && <p className="insp-why danger">{t('insp.leavesNext', { n: ob.alarm })}</p>;
+  const status = blocked ? (
+    <p className="insp-why danger">
+      <Rich text={t(`blocked.${blocked}`)} />
+    </p>
+  ) : (
+    !usingItem &&
+    !short && (
+      <p className={`insp-why ${canPay ? 'ok' : 'danger'}`}>
+        {canPay ? `${t('insp.youHave', { have })} ${t('insp.affordable')}` : t('insp.short', { have, need: cost[1] })}
+      </p>
+    )
+  );
+  const controls = (
+    <>
+      {!blocked && info && info.items.length > 0 && (
+        <div className="paywith" role="radiogroup" aria-label={t('insp.payWith')}>
+          <span className="lbl">{t('insp.payWith')}</span>
+          <button role="radio" aria-checked={!usingItem} className={!usingItem ? 'on' : ''} onClick={() => setItemPick(null)}>
+            {t('insp.payResources')}
+          </button>
+          {info.items.map((it) => (
+            <button key={it} role="radio" aria-checked={usingItem === it} className={usingItem === it ? 'on' : ''} onClick={() => setItemPick(it)}>
+              {t('act.useItem', { item: top(it) })} <small>({game.hand.includes(it) ? t('insp.inHand') : t('insp.equipped')})</small>
+            </button>
+          ))}
+        </div>
+      )}
+      {!blocked && !usingItem && cost[0] === 'a' && canPay && maxS > minS && (
+        <div className="split">
+          <span className="lbl">{t('insp.split')}</span>
+          <button onClick={() => setSplit(Math.max(minS, sPart - 1))} disabled={sPart <= minS} aria-label="−">
+            −
+          </button>
+          <span className="split-v">
+            <Badge kind="s" n={sPart} size={24} /> + <Badge kind="f" n={cost[1] - sPart} size={24} />
+          </span>
+          <button onClick={() => setSplit(Math.min(maxS, sPart + 1))} disabled={sPart >= maxS} aria-label="+">
+            +
+          </button>
+        </div>
+      )}
+    </>
+  );
+  const actions = (
+    <div className="acts">
+      {usingItem && <p className="insp-why ok">{t('act.useItemNote')}</p>}
+      <button className="act go" data-tut="act-disarm" disabled={disabled} onClick={() => run('disarm')}>
+        {t('act.disarm')} {notes && <small>{t('act.disarmNote')}</small>}
+      </button>
+      {info?.canEquip && (
+        <button className="act go" data-tut="act-equip" disabled={disabled} onClick={() => run('equip')}>
+          {t('act.disarmEquip')} {notes && <small>{t('act.disarmEquipNote')}</small>}
+        </button>
+      )}
+      <button className="act" data-tut="act-knockout" disabled={disabled} onClick={() => run('knockout')}>
+        {t('act.knockout')} {notes && <small>{t('act.knockoutNote')}</small>}
+      </button>
+      {info?.clumsyTargets.map((j) => (
+        <button key={j} className="act" disabled={disabled} onClick={() => run('clumsy', j)}>
+          {t('act.clumsy', { card: card(game.line[j]!.id).name })}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (short) {
+    // Actions first; the card's texts below them.
+    return (
+      <div className="insp" data-insp={lc.id}>
+        <InspArt id={lc.id} />
+        <div className="insp-body">
+          {header}
+          {costs}
+          {leaving}
+          {status}
+          {controls}
+          {actions}
+          {ability}
+          {gets}
+          {marks}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="insp" data-insp={lc.id}>
       <InspArt id={lc.id} />
       <div className="insp-body">
-        <h3>{c.name}</h3>
-        <div className="insp-sub">
-          {t('insp.position', { n: slot + 1 })} · {t(`types.${ob.type}`)}
-        </div>
-        <div className="insp-row insp-costs">
-          <span>{t('insp.cost')}</span>
-          <Badge kind={cost[0]} n={cost[1]} size={28} />
-          {mod > 0 && <small className="warn">{t('insp.watchtower', { n: mod })}</small>}
-          <span className="sep" />
-          <span>{t('insp.alarm')}</span>
-          <AlarmBadge n={ob.alarm} size={26} />
-        </div>
-        {c.ability && (
-          <p className="insp-ability">
-            <Rich text={c.ability} />
-          </p>
-        )}
-        <div className="insp-gets">
-          <span className="lbl">{t('insp.whenDisarmed')}</span>
-          <TopText id={lc.id} />
-        </div>
-        {isLast && <p className="insp-why danger">{t('insp.leavesNext', { n: ob.alarm })}</p>}
+        {header}
+        {costs}
+        {ability}
+        {gets}
+        {leaving}
         {marks}
-        {blocked ? (
-          <p className="insp-why danger">
-            <Rich text={t(`blocked.${blocked}`)} />
-          </p>
-        ) : (
-          !usingItem && (
-            <p className={`insp-why ${canPay ? 'ok' : 'danger'}`}>
-              {canPay ? `${t('insp.youHave', { have })} ${t('insp.affordable')}` : t('insp.short', { have, need: cost[1] })}
-            </p>
-          )
-        )}
-
-        {!blocked && info && info.items.length > 0 && (
-          <div className="paywith" role="radiogroup" aria-label={t('insp.payWith')}>
-            <span className="lbl">{t('insp.payWith')}</span>
-            <button role="radio" aria-checked={!usingItem} className={!usingItem ? 'on' : ''} onClick={() => setItemPick(null)}>
-              {t('insp.payResources')}
-            </button>
-            {info.items.map((it) => (
-              <button key={it} role="radio" aria-checked={usingItem === it} className={usingItem === it ? 'on' : ''} onClick={() => setItemPick(it)}>
-                {t('act.useItem', { item: top(it) })} <small>({game.hand.includes(it) ? t('insp.inHand') : t('insp.equipped')})</small>
-              </button>
-            ))}
-          </div>
-        )}
-        {!blocked && !usingItem && cost[0] === 'a' && canPay && maxS > minS && (
-          <div className="split">
-            <span className="lbl">{t('insp.split')}</span>
-            <button onClick={() => setSplit(Math.max(minS, sPart - 1))} disabled={sPart <= minS} aria-label="−">
-              −
-            </button>
-            <span className="split-v">
-              <Badge kind="s" n={sPart} size={24} /> + <Badge kind="f" n={cost[1] - sPart} size={24} />
-            </span>
-            <button onClick={() => setSplit(Math.min(maxS, sPart + 1))} disabled={sPart >= maxS} aria-label="+">
-              +
-            </button>
-          </div>
-        )}
-
-        <div className="acts">
-          {usingItem && <p className="insp-why ok">{t('act.useItemNote')}</p>}
-          <button className="act go" data-tut="act-disarm" disabled={disabled} onClick={() => run('disarm')}>
-            {t('act.disarm')} <small>{t('act.disarmNote')}</small>
-          </button>
-          {info?.canEquip && (
-            <button className="act go" data-tut="act-equip" disabled={disabled} onClick={() => run('equip')}>
-              {t('act.disarmEquip')} <small>{t('act.disarmEquipNote')}</small>
-            </button>
-          )}
-          <button className="act" data-tut="act-knockout" disabled={disabled} onClick={() => run('knockout')}>
-            {t('act.knockout')} <small>{t('act.knockoutNote')}</small>
-          </button>
-          {info?.clumsyTargets.map((j) => (
-            <button key={j} className="act" disabled={disabled} onClick={() => run('clumsy', j)}>
-              {t('act.clumsy', { card: card(game.line[j]!.id).name })}
-            </button>
-          ))}
-        </div>
+        {status}
+        {controls}
+        {actions}
       </div>
     </div>
   );
@@ -237,58 +303,76 @@ function LineInspector({ slot }: { slot: number }) {
 function HandInspector({ id }: { id: string }) {
   const { game, playCard, act, select, animating } = useGame();
   const { t, top } = useI18n();
+  const { short, notes } = useShortSheet();
   const def = defOf(id);
   const pi = playInfo(game, id);
   if (!def) return null;
   const tp = def.top;
   const item = tp.item;
   const dis = animating;
+  const texts = (
+    <>
+      <TopText id={id} />
+      {item && (
+        <p className="insp-why">
+          <Rich text={t('insp.itemHint', { type: `{${ITEM_TARGET[item]}} ${t(`types.${ITEM_TARGET[item]}`)}` })} />
+        </p>
+      )}
+      {tp.bonus && (
+        <p className="insp-why">
+          <Rich text={t('insp.bonusHint', { res: `{${tp.bonus[0]}${tp.bonus[1]}}` })} />
+        </p>
+      )}
+    </>
+  );
+  const actions = (
+    <div className="acts">
+      {pi.canPlay && tp.effect === 'rockOrDraw' && (
+        <>
+          <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id, { choice: 'fight' })}>
+            <Rich text={t('act.playFight')} />
+          </button>
+          <button className="act go" disabled={dis} onClick={() => playCard(id, { choice: 'draw' })}>
+            {t('act.playDraw')}
+          </button>
+        </>
+      )}
+      {pi.canPlay && tp.effect !== 'rockOrDraw' && (
+        <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id)}>
+          {tp.res ? <Rich text={t('act.playRes', { res: `{${tp.res[0]}${tp.res[1]}}` })} /> : t('act.play')}
+        </button>
+      )}
+      {pi.canEquip && (
+        <button
+          className="act go"
+          data-tut="act-equip"
+          disabled={dis}
+          onClick={() => {
+            if (act({ t: 'equip', card: id })) select(null);
+          }}
+        >
+          {t('act.equip')} {notes && <small>{t('act.equipNote')}</small>}
+        </button>
+      )}
+    </div>
+  );
   return (
     <div className="insp" data-insp={id}>
       <InspArt id={id} />
       <div className="insp-body">
         <h3>{top(id)}</h3>
         <div className="insp-sub">{t('insp.inHandTitle')}</div>
-        <TopText id={id} />
-        {item && (
-          <p className="insp-why">
-            <Rich text={t('insp.itemHint', { type: `{${ITEM_TARGET[item]}} ${t(`types.${ITEM_TARGET[item]}`)}` })} />
-          </p>
+        {short ? (
+          <>
+            {actions}
+            {texts}
+          </>
+        ) : (
+          <>
+            {texts}
+            {actions}
+          </>
         )}
-        {tp.bonus && (
-          <p className="insp-why">
-            <Rich text={t('insp.bonusHint', { res: `{${tp.bonus[0]}${tp.bonus[1]}}` })} />
-          </p>
-        )}
-        <div className="acts">
-          {pi.canPlay && tp.effect === 'rockOrDraw' && (
-            <>
-              <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id, { choice: 'fight' })}>
-                <Rich text={t('act.playFight')} />
-              </button>
-              <button className="act go" disabled={dis} onClick={() => playCard(id, { choice: 'draw' })}>
-                {t('act.playDraw')}
-              </button>
-            </>
-          )}
-          {pi.canPlay && tp.effect !== 'rockOrDraw' && (
-            <button className="act go" data-tut="act-play" disabled={dis} onClick={() => playCard(id)}>
-              {tp.res ? <Rich text={t('act.playRes', { res: `{${tp.res[0]}${tp.res[1]}}` })} /> : t('act.play')}
-            </button>
-          )}
-          {pi.canEquip && (
-            <button
-              className="act go"
-              data-tut="act-equip"
-              disabled={dis}
-              onClick={() => {
-                if (act({ t: 'equip', card: id })) select(null);
-              }}
-            >
-              {t('act.equip')} <small>{t('act.equipNote')}</small>
-            </button>
-          )}
-        </div>
       </div>
     </div>
   );
