@@ -6,7 +6,7 @@ import { useI18n } from '../i18n';
 import { activeSaved, dispatch, isGuided, setOverlay, undo, useApp } from '../state/store';
 import { Coach } from './Coach';
 import { DesktopLayout } from './Desktop';
-import { CardZoom, ChoiceDialog, PendingDialog, PhaseModal } from './Dialogs';
+import { CardPeek, CardZoom, ChoiceDialog, PendingDialog, PhaseModal } from './Dialogs';
 import { GameProvider, sameTarget, type ChoiceSpec, type GameUI, type Target } from './game';
 import { useLayoutMode } from './hooks';
 import { PhoneLayout } from './Phone';
@@ -23,6 +23,8 @@ export function GameScreen() {
   const [hovered, setHovered] = useState<Target | null>(null);
   const [choice, setChoice] = useState<ChoiceSpec | null>(null);
   const [zoomed, setZoomed] = useState<string | null>(null);
+  const [peeked, setPeeked] = useState<string | null>(null);
+  const unpeek = useCallback(() => setPeeked(null), []);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const frame = anim ? anim.frames[anim.i] : null;
@@ -170,6 +172,7 @@ export function GameScreen() {
     openMenu: () => setOverlay('menu'),
     openRules: () => setOverlay('rules'),
     zoom: setZoomed,
+    peek: setPeeked,
   };
 
   return (
@@ -179,6 +182,7 @@ export function GameScreen() {
       {!anim && <PendingDialog />}
       <PhaseModal />
       {zoomed && <CardZoom id={zoomed} onClose={() => setZoomed(null)} />}
+      {peeked && <CardPeek id={peeked} onClose={unpeek} />}
       {tutorial && <Coach />}
     </GameProvider>
   );

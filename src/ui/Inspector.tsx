@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { defOf, ITEM_TARGET, keyOf, missionDef } from '../engine/cards';
 import { defaultPayment, equipBonus, interactInfo, missionStatus, playInfo, rightmost } from '../engine/engine';
 import { useI18n } from '../i18n';
-import { AlarmBadge, Badge, CardImg, useGame, type Target } from './game';
+import { AlarmBadge, Badge, CardImg, useGame, usePeek, type Target } from './game';
 import { Icon } from './icons';
 import { Rich } from './Rich';
 
@@ -363,6 +363,7 @@ function MissionInspector() {
 function PileInspector({ pile }: { pile: 'deck' | 'discard' | 'play' | 'obsDiscard' | 'removed' }) {
   const { game, select } = useGame();
   const { t, top, name } = useI18n();
+  const peek = usePeek();
   const title = {
     deck: t('hud.deck'),
     discard: t('hud.discard'),
@@ -391,7 +392,7 @@ function PileInspector({ pile }: { pile: 'deck' | 'discard' | 'play' | 'obsDisca
         {!ids.length && <p className="insp-why">{t('insp.pileEmpty')}</p>}
         <div className="pile-grid">
           {ids.map((id) => (
-            <button key={id} className="pile-card" onClick={() => pile === 'play' && select({ kind: 'play', id })} title={pile === 'obsDiscard' ? name(id) : top(id)}>
+            <button key={id} {...peek(id)} className="pile-card" onClick={() => pile === 'play' && select({ kind: 'play', id })} title={pile === 'obsDiscard' ? name(id) : top(id)}>
               <CardImg id={id} />
             </button>
           ))}

@@ -1,5 +1,5 @@
 // Shared game-screen state (selection, hover, dialogs) and small building blocks.
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import { keyOf, missionDef, type CostKind } from '../engine/cards';
 import { interactionLimit, missionStatus, nextExitAlarm } from '../engine/engine';
 import type { Action, GameState, Line } from '../engine/types';
@@ -56,6 +56,8 @@ export interface GameUI {
   openRules: () => void;
   /** Show a card full screen. */
   zoom: (id: string) => void;
+  /** Show a card full screen while it's pressed (null hides it). */
+  peek: (id: string | null) => void;
 }
 
 const Ctx = createContext<GameUI | null>(null);
@@ -64,6 +66,50 @@ export function useGame(): GameUI {
   const v = useContext(Ctx);
   if (!v) throw new Error('useGame outside GameProvider');
   return v;
+}
+
+/**
+ * Press and hold a card (touch or pen) to see it full size until you let go; the tap that
+ * ends the hold doesn't select the card. Returns a function giving a card element's props;
+ * pass null for cards that can't be shown (face down).
+ */
+export function usePeek() {
+  const { peek } = useGame();
+  const st = useRef({ timer: 0, x: 0, y: 0, shown: false, touch: false });
+  useEffect(() => () => clearTimeout(st.current.timer), []);
+  return (id: string | null) => {
+    if (!id) return {};
+    const s = st.current;
+    return {
+      onPointerDown: (e: PointerEvent<HTMLElement>) => {
+        s.touch = e.pointerType !== 'mouse';
+        s.shown = false;
+        clearTimeout(s.timer);
+        if (!s.touch) return;
+        s.x = e.clientX;
+        s.y = e.clientY;
+        s.timer = window.setTimeout(() => {
+          s.shown = true;
+          peek(id);
+          navigator.vibrate?.(8);
+        }, 380);
+      },
+      onPointerMove: (e: PointerEvent<HTMLElement>) => {
+        if (!s.shown && Math.hypot(e.clientX - s.x, e.clientY - s.y) > 10) clearTimeout(s.timer);
+      },
+      onPointerUp: () => clearTimeout(s.timer),
+      onPointerCancel: () => clearTimeout(s.timer),
+      onClickCapture: (e: MouseEvent<HTMLElement>) => {
+        if (!s.shown) return;
+        s.shown = false;
+        e.preventDefault();
+        e.stopPropagation();
+      },
+      onContextMenu: (e: MouseEvent<HTMLElement>) => {
+        if (s.touch) e.preventDefault();
+      },
+    };
+  };
 }
 
 export const cardSrc = (key: string, size: 240 | 480 = 240) => `${import.meta.env.BASE_URL}cards/${size}/${key}.webp`;
@@ -208,11 +254,13 @@ export function useEquipLabel() {
 export function EquipChips() {
   const { game, select, hover } = useGame();
   const label = useEquipLabel();
+  const peek = usePeek();
   return (
     <>
       {game.equip.map((id) => (
         <button
           key={id}
+          {...peek(id)}
           className="eq"
           onClick={() => select({ kind: 'equip', id })}
           onPointerEnter={(e) => e.pointerType === 'mouse' && hover({ kind: 'equip', id })}

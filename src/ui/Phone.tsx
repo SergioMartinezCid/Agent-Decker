@@ -4,7 +4,7 @@ import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '..
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
 import { Modal } from './Dialogs';
-import { AlarmBadge, AlarmMeter, Badge, EquipChips, GoalStatus, Piles, PoolView, TopBar, useGame } from './game';
+import { AlarmBadge, AlarmMeter, Badge, EquipChips, GoalStatus, Piles, PoolView, TopBar, useGame, usePeek } from './game';
 import { useFlip } from './hooks';
 import { CardsIcon, Icon, TypeIcon } from './icons';
 import { Inspector, keyForTarget } from './Inspector';
@@ -81,6 +81,7 @@ function GapRow({ slot }: { slot: number }) {
 function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const { game, view, select, animating } = useGame();
   const { t, card, short } = useI18n();
+  const peek = usePeek();
   const last = rightmost(view.line) === slot;
   if (lc.down) {
     return (
@@ -105,7 +106,7 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const top = defOf(lc.id)?.top;
   const ability = sh.ability ?? c.ability;
   return (
-    <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''} ${ability ? 'ab' : ''}`} onClick={() => select({ kind: 'line', slot })}>
+    <button {...peek(lc.id)} data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''} ${ability ? 'ab' : ''}`} onClick={() => select({ kind: 'line', slot })}>
       <span className="row-n">{slot + 1}</span>
       <span className="row-main">
         <span className="row-name">
@@ -164,6 +165,7 @@ function HandTiles() {
 function HandTile({ id }: { id: string }) {
   const { game, select } = useGame();
   const { top, short } = useI18n();
+  const peek = usePeek();
   const def = defOf(id);
   if (!def) return null;
   const pi = playInfo(game, id);
@@ -171,6 +173,7 @@ function HandTile({ id }: { id: string }) {
   const text = short(id).effect;
   return (
     <button
+      {...peek(id)}
       data-flip={id}
       data-tut="hand-card"
       data-id={id}

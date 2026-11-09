@@ -417,6 +417,10 @@ a { color: var(--fg); }
 .chip-tut { color: #111; background: var(--keep); border-color: var(--keep); }
 .range { accent-color: var(--keep); width: min(240px, 55vw); }
 
+.peek { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; background: #000b; pointer-events: none; animation: peek-in 0.14s ease-out; }
+.peek img { width: min(440px, 92vw, calc((100dvh - 32px) * 0.708)); display: block; border-radius: 5%; box-shadow: 0 20px 60px #000; }
+@keyframes peek-in { from { opacity: 0; transform: scale(0.94); } }
+.eq, .choice-card, .pile-card { -webkit-touch-callout: none; user-select: none; }
 .toast { position: fixed; z-index: 80; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: var(--panel-2); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; box-shadow: 0 10px 30px #000a; display: flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); }
 
 @media (max-width: 1440px) {

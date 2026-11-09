@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { MISSIONS, keyOf } from '../engine/cards';
 import { useI18n } from '../i18n';
 import { dispatch, finishTutorial, newGame, retryMission, retryTutorial, setScreen, useApp } from '../state/store';
-import { CardImg, cardSrc, useGame, type ChoiceSpec } from './game';
+import { CardImg, cardSrc, useGame, usePeek, type ChoiceSpec } from './game';
 import { Icon } from './icons';
 import { Rich } from './Rich';
 
@@ -64,6 +64,20 @@ export function CardZoom({ id, onClose }: { id: string; onClose: () => void }) {
   );
 }
 
+/** The card held down with a finger, full size; it goes away when the finger lifts. */
+export function CardPeek({ id, onClose }: { id: string; onClose: () => void }) {
+  useEffect(() => {
+    const events = ['pointerup', 'pointercancel', 'blur'] as const;
+    events.forEach((ev) => window.addEventListener(ev, onClose));
+    return () => events.forEach((ev) => window.removeEventListener(ev, onClose));
+  }, [onClose]);
+  return (
+    <div className="peek" aria-hidden="true">
+      <img src={cardSrc(keyOf(id), 480)} alt="" draggable={false} />
+    </div>
+  );
+}
+
 export function ChoiceDialog({ spec, onDone }: { spec: ChoiceSpec; onDone: () => void }) {
   const { t, name, top } = useI18n();
   const [picked, setPicked] = useState<string[]>([]);
@@ -85,6 +99,7 @@ export function ChoiceDialog({ spec, onDone }: { spec: ChoiceSpec; onDone: () =>
     onDone();
   };
   const down = new Set(spec.down ?? []);
+  const peek = usePeek();
   return (
     <Modal label={spec.title} onClose={spec.cancellable ? onDone : undefined} className="choice">
       <h2>{spec.title}</h2>
@@ -96,7 +111,7 @@ export function ChoiceDialog({ spec, onDone }: { spec: ChoiceSpec; onDone: () =>
         {spec.cards.map((id) => {
           const i = picked.indexOf(id);
           return (
-            <button key={id} className={`choice-card ${i >= 0 ? 'on' : ''}`} onClick={() => toggle(id)} aria-pressed={i >= 0}>
+            <button key={id} {...peek(down.has(id) ? null : id)} className={`choice-card ${i >= 0 ? 'on' : ''}`} onClick={() => toggle(id)} aria-pressed={i >= 0}>
               <CardImg id={id} down={down.has(id)} />
               <span className="choice-name">{down.has(id) ? t('hud.knockedOut') : spec.obstacleNames ? name(id) : top(id)}</span>
               {i >= 0 && <span className="choice-mark">{spec.mode === 'order' ? i + 1 : <Icon name="check" size={16} />}</span>}
