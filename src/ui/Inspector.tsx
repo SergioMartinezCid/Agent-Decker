@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { defOf, ITEM_TARGET, keyOf, missionDef } from '../engine/cards';
 import { defaultPayment, equipBonus, interactInfo, missionStatus, playInfo, rightmost } from '../engine/engine';
 import { useI18n } from '../i18n';
-import { AlarmBadge, Badge, CardImg, useGame, usePeek, type Target } from './game';
+import { AlarmBadge, Badge, CardImg, MarkIcon, useGame, useLineMarks, usePeek, type Target } from './game';
 import { Icon } from './icons';
 import { Rich } from './Rich';
 
@@ -84,6 +84,12 @@ function LineInspector({ slot }: { slot: number }) {
   const def = lc ? defOf(lc.id) : undefined;
   const [itemPick, setItemPick] = useState<string | null>(null);
   const [split, setSplit] = useState<number | null>(null);
+  const marks = (useLineMarks()?.[slot] ?? []).map((m) => (
+    <p key={m} className="insp-why insp-mark">
+      <MarkIcon mark={m} size={16} />
+      <span>{t(`marks.${m}.text`)}</span>
+    </p>
+  ));
 
   if (!lc || !def?.obstacle) {
     return (
@@ -103,6 +109,7 @@ function LineInspector({ slot }: { slot: number }) {
           <h3>{t('insp.faceDownTitle')}</h3>
           <div className="insp-sub">{t('insp.position', { n: slot + 1 })}</div>
           <p className="insp-why">{t('insp.faceDownText')}</p>
+          {marks}
         </div>
       </div>
     );
@@ -160,6 +167,7 @@ function LineInspector({ slot }: { slot: number }) {
           <TopText id={lc.id} />
         </div>
         {isLast && <p className="insp-why danger">{t('insp.leavesNext', { n: ob.alarm })}</p>}
+        {marks}
         {blocked ? (
           <p className="insp-why danger">
             <Rich text={t(`blocked.${blocked}`)} />

@@ -96,7 +96,12 @@ export type IconName =
   | 'chevron'
   | 'zoom'
   | 'school'
-  | 'bolt';
+  | 'bolt'
+  | 'flame'
+  | 'burst'
+  | 'pin'
+  | 'flip'
+  | 'siren';
 
 const UI_PATHS: Record<IconName, string> = {
   menu: 'M4 6h16M4 12h16M4 18h16',
@@ -120,6 +125,11 @@ const UI_PATHS: Record<IconName, string> = {
   zoom: 'M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20.5 20.5l-5-5M10.5 7.5v6M7.5 10.5h6',
   school: 'M2 9.5 12 5l10 4.5L12 14zM6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5M22 9.5V15',
   bolt: 'M13 2 4.5 13.5H11L10 22l8.5-11.5H12z',
+  flame: 'M12 3c.6 3.2 4.5 5.3 4.5 9.6a4.5 4.5 0 0 1-9 0c0-2.2 1.2-3.6 2.2-4.5.2 1.5.9 2.4 1.8 2.8-.3-2.6.2-5.4.5-7.9z',
+  burst: 'M12 2.5l1.9 5 5.1-1.8-2.6 4.7 4.6 2.8-5.3.9.4 5.4-4.1-3.5-4.1 3.5.4-5.4-5.3-.9 4.6-2.8L5 5.7l5.1 1.8z',
+  pin: 'M9 3.5h6M10 3.5v5.5l-3 3.5h10l-3-3.5V3.5M12 12.5V21',
+  flip: 'M4 12a8 8 0 0 1 13.7-5.6M18 3v4h-4M20 12a8 8 0 0 1-13.7 5.6M6 21v-4h4',
+  siren: 'M7 17v-4.5a5 5 0 0 1 10 0V17M5 17h14v3.5H5zM12 2.5v2.5M4 5.5l1.8 1.8M20 5.5l-1.8 1.8',
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

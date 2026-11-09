@@ -86,6 +86,21 @@ export const SCENARIOS: DevScenario[] = [
       }),
   },
   {
+    name: 'Mission 3 · line hints (Inspector turns a card face up)',
+    build: () =>
+      scenario({
+        mission: 3,
+        alarm: 16,
+        scores: [18, 24],
+        turn: 4,
+        line: ['guard-dog', 'inspector', { c: 'guard', down: true }, 'yard-door', { c: 'waste-room', down: true }, 'security-camera'],
+        hand: ['hide', 'punch', 'locker-room', 'infirmary', 'punch'],
+        discard: ['hide', 'punch'],
+        equip: ['mission-1', 'mission-2'],
+        pool: { s: 1, f: 0 },
+      }),
+  },
+  {
     name: 'Mission 1 · ready to complete',
     build: () =>
       scenario({

@@ -483,6 +483,13 @@ function lineScroll(ctx: Ctx) {
   }
 }
 
+/** The line as the next Line Scroll will leave it, before new cards come in. For hints only. */
+export function scrollPreview(s: GameState): Line {
+  const ctx: Ctx = { s: structuredClone(s), events: [], frames: [], barrier: false };
+  lineScroll(ctx);
+  return ctx.s.line;
+}
+
 /** Distraction: pull a card back to the start of the line; the cards it passes shift right. */
 function moveToStart(ctx: Ctx, k: number) {
   const { line } = ctx.s;

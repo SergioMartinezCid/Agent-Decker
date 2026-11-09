@@ -1,10 +1,11 @@
 // Shared game-screen state (selection, hover, dialogs) and small building blocks.
-import { createContext, useContext, useEffect, useRef, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useRef, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import { keyOf, missionDef, type CostKind } from '../engine/cards';
 import { interactionLimit, missionStatus, nextExitAlarm } from '../engine/engine';
 import type { Action, GameState, Line } from '../engine/types';
 import { useI18n } from '../i18n';
-import { AlarmBadge, Badge, Icon } from './icons';
+import { AlarmBadge, Badge, Icon, type IconName } from './icons';
+import { lineMarks, type Mark } from './marks';
 import { Rich } from './Rich';
 
 export type Pile = 'deck' | 'discard' | 'play' | 'obsDiscard' | 'removed';
@@ -118,6 +119,27 @@ export function CardImg({ id, size = 240, down, className }: { id: string; size?
   const { name } = useI18n();
   const key = down ? 'back' : keyOf(id);
   return <img className={className} src={cardSrc(key, size)} alt={down ? '' : name(id)} draggable={false} decoding="async" />;
+}
+
+// ---------------------------------------------------------------- line marks
+
+/** What other obstacles will do to each card of the line; null while the line is animating. */
+export function useLineMarks(): Mark[][] | null {
+  const { game, view, animating } = useGame();
+  const live = !animating && view.line === game.line;
+  return useMemo(() => (live ? lineMarks(game) : null), [live, game]);
+}
+
+const MARK_ICON: Record<Mark, IconName> = { burn: 'flame', clumsy: 'burst', pinned: 'pin', flip: 'flip', swept: 'siren' };
+
+export function MarkIcon({ mark, size = 14 }: { mark: Mark; size?: number }) {
+  const { t } = useI18n();
+  const label = t(`marks.${mark}.label`);
+  return (
+    <span className={`mk mk-${mark}`} role="img" aria-label={label} title={label}>
+      <Icon name={MARK_ICON[mark]} size={size} />
+    </span>
+  );
 }
 
 // ---------------------------------------------------------------- HUD pieces

@@ -136,6 +136,13 @@ export const es: Dict = {
     pileEmpty: 'Esta pila está vacía.',
     keep: 'KEEP',
   },
+  marks: {
+    burn: { label: 'Noqueada con el Barril', text: 'Junto al Barril inflamable: si interactúas con el Barril, esta carta también queda noqueada.' },
+    clumsy: { label: 'El Guardia torpe puede noquearla', text: 'Junto al Guardia torpe: al interactuar con el Guardia puedes noquear esta carta en su lugar.' },
+    pinned: { label: 'No se mueve en el avance', text: 'El Dormitorio mantiene esta carta boca abajo en su sitio durante el avance.' },
+    flip: { label: 'Se pone boca arriba en el avance', text: 'En el próximo avance, el Inspector pondrá esta carta boca arriba.' },
+    swept: { label: 'Sale con la Sirena', text: 'Cuando la Sirena salga al final de este turno, esta carta saldrá con ella sin subir la alarma.' },
+  },
   blocked: {
     phase: 'Termina primero la elección actual.',
     faceDown: 'Está noqueada.',

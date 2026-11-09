@@ -4,10 +4,11 @@ import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '..
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
 import { Modal } from './Dialogs';
-import { AlarmBadge, AlarmMeter, Badge, EquipChips, GoalStatus, Piles, PoolView, TopBar, useGame, usePeek } from './game';
+import { AlarmBadge, AlarmMeter, Badge, EquipChips, GoalStatus, MarkIcon, Piles, PoolView, TopBar, useGame, useLineMarks, usePeek } from './game';
 import { useFlip } from './hooks';
 import { CardsIcon, Icon, TypeIcon } from './icons';
 import { Inspector, keyForTarget } from './Inspector';
+import type { Mark } from './marks';
 import { Rich } from './Rich';
 
 /** Layout C: the line runs top to bottom and leaves toward the alarm. */
@@ -56,10 +57,11 @@ export function PhoneLayout() {
 function Conveyor() {
   const { view } = useGame();
   const ref = useRef<HTMLDivElement>(null);
+  const marks = useLineMarks();
   useFlip(ref, true, view.line);
   return (
     <div className="conv" data-tut="line" ref={ref}>
-      {view.line.map((lc, i) => (lc ? <Row key={lc.id} lc={lc} slot={i} /> : <GapRow key={`g${i}`} slot={i} />))}
+      {view.line.map((lc, i) => (lc ? <Row key={lc.id} lc={lc} slot={i} marks={marks?.[i] ?? []} /> : <GapRow key={`g${i}`} slot={i} />))}
     </div>
   );
 }
@@ -78,7 +80,7 @@ function GapRow({ slot }: { slot: number }) {
   );
 }
 
-function Row({ lc, slot }: { lc: LineCard; slot: number }) {
+function Row({ lc, slot, marks }: { lc: LineCard; slot: number; marks: Mark[] }) {
   const { game, view, select, animating } = useGame();
   const { t, card, short } = useI18n();
   const peek = usePeek();
@@ -88,7 +90,12 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
       <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className="row down" onClick={() => select({ kind: 'line', slot })}>
         <span className="row-n">{slot + 1}</span>
         <span className="row-main">
-          <span className="row-name">{t('hud.knockedOut')}</span>
+          <span className="row-name">
+            {t('hud.knockedOut')}
+            {marks.map((m) => (
+              <MarkIcon key={m} mark={m} />
+            ))}
+          </span>
           {last && <span className="row-text">{t('hud.silent')}</span>}
         </span>
       </button>
@@ -112,6 +119,9 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
         <span className="row-name">
           {c.name} <TypeIcon type={ob.type} label={t(`types.${ob.type}`)} />
           {locked && <Icon name="lock" size={13} />}
+          {marks.map((m) => (
+            <MarkIcon key={m} mark={m} />
+          ))}
         </span>
         {ability && (
           <span className="row-ab">

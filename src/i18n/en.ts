@@ -154,6 +154,14 @@ export const en = {
     pileEmpty: 'This pile is empty.',
     keep: 'KEEP',
   },
+  // Hints on line cards about what other obstacles will do to them.
+  marks: {
+    burn: { label: 'Knocked out with the Barrel', text: 'Next to the Flammable Barrel: interacting with the Barrel knocks this card out too.' },
+    clumsy: { label: 'The Clumsy Guard can knock this out', text: 'Next to the Clumsy Guard: interacting with the Guard can knock this card out instead.' },
+    pinned: { label: 'Stays put at the scroll', text: 'The Dormitory keeps this face-down card in place at the scroll.' },
+    flip: { label: 'Turns face up at the scroll', text: 'At the next scroll, the Inspector turns this card face up.' },
+    swept: { label: 'Leaves with the Siren', text: 'When the Siren leaves at the end of this turn, this card leaves with it, without raising the alarm.' },
+  },
   blocked: {
     phase: 'Finish the current choice first.',
     faceDown: "It's knocked out.",

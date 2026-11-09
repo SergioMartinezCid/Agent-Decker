@@ -3,11 +3,12 @@ import { defOf, keyOf } from '../engine/cards';
 import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '../engine/engine';
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
-import { AlarmMeter, CardImg, EquipChips, GoalStatus, LogList, Piles, PoolView, TopBar, useGame, type Target } from './game';
+import { AlarmMeter, CardImg, EquipChips, GoalStatus, LogList, MarkIcon, Piles, PoolView, TopBar, useGame, useLineMarks, type Target } from './game';
 import { useFlip } from './hooks';
 import { Modal } from './Dialogs';
 import { Icon } from './icons';
 import { Inspector, keyForTarget } from './Inspector';
+import type { Mark } from './marks';
 
 /** Layout B: sidebar · line + hand · inspector panel that follows the pointer. */
 export function DesktopLayout({ compact }: { compact: boolean }) {
@@ -95,12 +96,13 @@ function LineRow() {
   const { view, animating } = useGame();
   const { t } = useI18n();
   const ref = useRef<HTMLDivElement>(null);
+  const marks = useLineMarks();
   useFlip(ref, true, view.line);
   return (
     <div className="lrow" data-tut="line" ref={ref}>
       {view.line.map((lc, i) =>
         lc ? (
-          <LineCardArt key={lc.id} lc={lc} slot={i} />
+          <LineCardArt key={lc.id} lc={lc} slot={i} marks={marks?.[i] ?? []} />
         ) : (
           <div key={`gap${i}`} className="slot gap">
             <span>
@@ -115,7 +117,7 @@ function LineRow() {
   );
 }
 
-function LineCardArt({ lc, slot }: { lc: LineCard; slot: number }) {
+function LineCardArt({ lc, slot, marks }: { lc: LineCard; slot: number; marks: Mark[] }) {
   const { game, view, select, hover, target, animating } = useGame();
   const { t, name } = useI18n();
   const me: Target = { kind: 'line', slot };
@@ -146,6 +148,13 @@ function LineCardArt({ lc, slot }: { lc: LineCard; slot: number }) {
       {last && !lc.down && (
         <span className="exit-tag">
           {t('hud.leavesNext')} +{ob.alarm}
+        </span>
+      )}
+      {marks.length > 0 && (
+        <span className="marks">
+          {marks.map((m) => (
+            <MarkIcon key={m} mark={m} size={15} />
+          ))}
         </span>
       )}
       {info && (info.blocked === 'sniper' || info.blocked === 'hawk') && (
