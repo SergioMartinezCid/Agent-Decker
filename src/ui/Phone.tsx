@@ -80,13 +80,12 @@ function GapRow({ slot }: { slot: number }) {
 
 function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const { game, view, select, animating } = useGame();
-  const { t, card } = useI18n();
+  const { t, card, short } = useI18n();
   const last = rightmost(view.line) === slot;
   if (lc.down) {
     return (
       <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className="row down" onClick={() => select({ kind: 'line', slot })}>
         <span className="row-n">{slot + 1}</span>
-        <CardImg id={lc.id} down className="row-art" />
         <span className="row-main">
           <span className="row-name">{t('hud.knockedOut')}</span>
           {last && <span className="row-text">{t('hud.silent')}</span>}
@@ -96,6 +95,7 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   }
   const ob = obstacleOf(lc.id)!;
   const c = card(lc.id);
+  const sh = short(lc.id);
   const live = !animating && view.line === game.line;
   const info = live ? interactInfo(game, slot) : null;
   const cost = effectiveCost({ ...game, line: view.line }, slot);
@@ -103,23 +103,32 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const can = !!info && !info.blocked && (info.affordable || info.items.length > 0);
   const locked = info && (info.blocked === 'sniper' || info.blocked === 'hawk');
   const top = defOf(lc.id)?.top;
+  const ability = sh.ability ?? c.ability;
   return (
     <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''}`} onClick={() => select({ kind: 'line', slot })}>
       <span className="row-n">{slot + 1}</span>
-      <CardImg id={lc.id} className="row-art" />
       <span className="row-main">
         <span className="row-name">
           {c.name} <TypeIcon type={ob.type} label={t(`types.${ob.type}`)} />
           {locked && <Icon name="lock" size={13} />}
         </span>
-        <span className="row-text">
-          {c.ability ? (
-            <Rich text={c.ability} size={15} />
-          ) : (
-            <>
-              → {top?.res && <Badge kind={top.res[0]} n={top.res[1]} size={15} />} <b>{c.top}</b>
-              {top?.keep && <span className="keep">KEEP</span>}
-            </>
+        {ability && (
+          <span className="row-ab">
+            <Icon name="bolt" size={12} />
+            <span>
+              <Rich text={ability} size={14} />
+            </span>
+          </span>
+        )}
+        <span className="row-get">
+          <span className="arrow">→</span>
+          {top?.res && <Badge kind={top.res[0]} n={top.res[1]} size={15} />}
+          <b>{c.top}</b>
+          {top?.keep && <span className="keep">KEEP</span>}
+          {sh.effect && (
+            <span className="row-eff">
+              <Rich text={sh.effect} size={14} />
+            </span>
           )}
         </span>
       </span>

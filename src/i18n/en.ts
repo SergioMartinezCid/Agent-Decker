@@ -9,6 +9,12 @@ export interface CardText {
   ability?: string;
 }
 
+/** Our own short versions of a card's texts, for the small phone rows and tiles. */
+export interface CardShort {
+  effect?: string;
+  ability?: string;
+}
+
 export interface MissionText {
   title: string;
   quote: string;
@@ -105,6 +111,7 @@ export const en = {
     lineDir: 'cards enter left, leave right',
     leavesNext: 'Leaves next',
     knockedOut: 'Knocked out',
+    cardsIcon: 'cards',
     empty: 'Empty',
     disarmed: 'disarmed this turn',
     menu: 'Menu',
@@ -230,7 +237,7 @@ export const en = {
         desk: 'This is the line: the obstacles in your way. New ones enter on the left, and every turn they move right, toward the exit.',
         phone: 'This is the line: the obstacles in your way. New ones enter at the top, and every turn they move down, toward the exit.',
       },
-      exit: 'At the end of every turn, the last card leaves the line and raises the alarm by the number at its bottom. The Waste Room will add {n}.\nIf the alarm reaches 50, the guards catch you.',
+      exit: 'At the end of every turn, the last card leaves the line and raises the alarm by the number in its crosshair. The Waste Room will add {n}.\nIf the alarm reaches 50, the guards catch you.',
       goal: 'Your goal in this mission: get {s6}. End a turn with that much Stealth available and the mission is complete.',
       play: {
         click: 'These are your cards. Hide gives {s1} Stealth and Punch gives {f1} Fight.\nClick both Hide cards to play them.',
@@ -267,7 +274,7 @@ export const en = {
     title: 'About',
     p1: 'Agent Decker is a solo print-and-play deckbuilding game designed by Manuel Correia. This is an unofficial web adaptation, not affiliated with or endorsed by him.',
     p2: 'Agent Decker by Manuel Correia is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License. The card art, card texts and rules in this app come from the original game. It is free and non-commercial.',
-    p3: 'Changes from the original: card images are cropped from the print-and-play PDF, the rules are reformatted and translated, a clarifications FAQ is added, and setup, line movement and scoring are automated.',
+    p3: 'Changes from the original: card images are cropped from the print-and-play PDF, the rules are reformatted and translated, a clarifications FAQ and short summaries of the card texts are added, and setup, line movement and scoring are automated.',
     p4: 'The app code is released under the MIT License.',
     original: 'Original game',
     license: 'CC BY-NC 4.0 license',
@@ -453,6 +460,35 @@ export const en = {
     'mission-4': { name: 'Mission Four', top: 'New Rule', effect: 'You can now interact with up to THREE obstacle cards per turn.' },
     'mission-5': { name: 'Mission Five', top: 'Mission Complete' },
   } as Record<string, CardText>,
+  // Short versions of the card texts above, written for this app (not from the original game).
+  // {cards} is drawn as a small card icon.
+  cardsShort: {
+    'patrolling-guard': { effect: '+2 {cards}', ability: 'Moves one extra space at the scroll' },
+    'waste-room': { effect: 'Remove cards in your hand from the game' },
+    'guard-dog': { effect: '+1 {cards}', ability: 'On arrival: runs next to a {person}' },
+    'gym-door': { effect: '{f1} for every 2 cards in your discard' },
+    'sleeping-guard': { effect: 'Pays for a {door}' },
+    infirmary: { effect: 'Pays for a {person}' },
+    'yard-door': { effect: '{f1} or +1 {cards}' },
+    'radio-tower': { effect: 'Put cards from your hand in play: {s2} each', ability: 'On arrival: pulls every {person} next to it' },
+    siren: { effect: '+1 {cards} per KEEP equipped (max 3)', ability: 'When it leaves: clears the whole line' },
+    'locker-room': { effect: '{s1} every turn while equipped' },
+    inspector: { effect: 'Take a card from your discard', ability: 'At the scroll: flips the last card face up' },
+    'archive-door': { effect: 'Look at your top 3 cards, keep 1' },
+    dormitory: { effect: 'Pull an obstacle back to the start', ability: 'At the scroll: face-down cards stay put' },
+    'engineering-bay': { effect: 'Pays for an {electronic}' },
+    'cctv-room-door': { effect: 'Shuffle the obstacles discard back in' },
+    sniper: { effect: 'Put any card from your deck on top', ability: 'Only if it’s the only {person} left' },
+    watchtower: { effect: 'Reorder your top 5 cards', ability: 'Adjacent cards cost +2' },
+    'prison-door': { effect: '{f1} every turn while equipped' },
+    'flammable-barrel': { effect: 'Remove up to 2 cards in your discard', ability: 'Also knocks out the adjacent cards' },
+    'guard-with-bazooka': { effect: 'One use, then back to the obstacles' },
+    'tech-container': { effect: 'One use, then back to the obstacles' },
+    'chain-link-fence': { effect: 'Save a card for the next turn' },
+    'laser-hall': { effect: '+3 {cards}' },
+    'clumsy-guard': { ability: 'May knock out an adjacent card instead' },
+    hawk: { effect: 'Swap your deck and your discard', ability: 'Blocks cards that cost only {s}' },
+  } as Record<string, CardShort>,
 };
 
 export type Dict = typeof en;

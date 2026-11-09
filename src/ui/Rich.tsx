@@ -1,12 +1,12 @@
 import { Fragment, type ReactNode } from 'react';
 import type { CostKind, ObstacleType } from '../engine/cards';
 import { useI18n } from '../i18n';
-import { Badge, TypeIcon } from './icons';
+import { Badge, CardsIcon, TypeIcon } from './icons';
 
-const TOKEN = /(\*\*[^*]+\*\*|\{(?:[sfa]\d*|person|location|animal|electronic|door)\})/g;
+const TOKEN = /(\*\*[^*]+\*\*|\{(?:[sfa]\d*|person|location|animal|electronic|door|cards)\})/g;
 const TYPES = new Set(['person', 'location', 'animal', 'electronic', 'door']);
 
-/** Renders **bold** and icon tokens ({s2}, {f1}, {a18}, {person}, …) inside a string. */
+/** Renders **bold** and icon tokens ({s2}, {f1}, {a18}, {person}, {cards}, …) inside a string. */
 export function Rich({ text, size = 18 }: { text: string; size?: number }) {
   const { t } = useI18n();
   const parts = text.split(TOKEN);
@@ -20,6 +20,10 @@ export function Rich({ text, size = 18 }: { text: string; size?: number }) {
     const m = /^\{(.+)\}$/.exec(part);
     if (m) {
       const tok = m[1];
+      if (tok === 'cards') {
+        out.push(<CardsIcon key={i} size={size} label={t('hud.cardsIcon')} />);
+        return;
+      }
       if (TYPES.has(tok)) {
         out.push(<TypeIcon key={i} type={tok as ObstacleType} label={t(`types.${tok}`)} />);
         return;

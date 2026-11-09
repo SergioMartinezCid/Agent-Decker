@@ -65,6 +65,16 @@ export function TypeIcon({ type, label }: { type: ObstacleType; label?: string }
   );
 }
 
+/** Two stacked cards, for "draw cards" in short texts. */
+export function CardsIcon({ size = 18, label }: { size?: number; label?: string }) {
+  return (
+    <svg className="ci" width={Math.round(size * 0.8)} height={size} viewBox="0 0 20 24" role="img" aria-label={label}>
+      <rect x="6.5" y="2" width="11" height="16" rx="2" fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.6" />
+      <rect x="2.5" y="5.5" width="11" height="16" rx="2" fill="currentColor" />
+    </svg>
+  );
+}
+
 export type IconName =
   | 'menu'
   | 'undo'
@@ -85,7 +95,8 @@ export type IconName =
   | 'flask'
   | 'chevron'
   | 'zoom'
-  | 'school';
+  | 'school'
+  | 'bolt';
 
 const UI_PATHS: Record<IconName, string> = {
   menu: 'M4 6h16M4 12h16M4 18h16',
@@ -108,6 +119,7 @@ const UI_PATHS: Record<IconName, string> = {
   chevron: 'M9 5l7 7-7 7',
   zoom: 'M10.5 17.5a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20.5 20.5l-5-5M10.5 7.5v6M7.5 10.5h6',
   school: 'M2 9.5 12 5l10 4.5L12 14zM6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5M22 9.5V15',
+  bolt: 'M13 2 4.5 13.5H11L10 22l8.5-11.5H12z',
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

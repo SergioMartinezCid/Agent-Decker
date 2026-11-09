@@ -3,7 +3,7 @@ import { keyOf } from '../engine/cards';
 import { rulesEn } from '../content/rules-en';
 import { rulesEs } from '../content/rules-es';
 import type { RulesContent } from '../content/types';
-import { en, type CardText, type Dict } from './en';
+import { en, type CardShort, type CardText, type Dict } from './en';
 import { es } from './es';
 
 export type Lang = 'en' | 'es';
@@ -40,6 +40,8 @@ export interface I18n {
   name: (idOrKey: string) => string;
   /** Top-half name: what the card is once it's yours. */
   top: (idOrKey: string) => string;
+  /** Short versions of the card's texts, for small screens. */
+  short: (idOrKey: string) => CardShort;
   logLine: (k: string, p?: Params) => string;
 }
 
@@ -55,6 +57,7 @@ export function makeI18n(lang: Lang): I18n {
     card,
     name: (id) => card(id).name,
     top: (id) => card(id).top,
+    short: (id) => d.cardsShort[keyOf(id)] ?? en.cardsShort[keyOf(id)] ?? {},
     logLine: (k, p) => {
       const tpl = d.log[k] ?? en.log[k] ?? k;
       if (!p) return tpl;
