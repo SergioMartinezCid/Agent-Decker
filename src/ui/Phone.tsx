@@ -1,12 +1,12 @@
 import { useRef } from 'react';
-import { defOf, keyOf } from '../engine/cards';
+import { defOf, ITEM_TARGET, keyOf } from '../engine/cards';
 import { effectiveCost, interactInfo, obstacleOf, playInfo, rightmost } from '../engine/engine';
 import type { LineCard } from '../engine/types';
 import { useI18n } from '../i18n';
 import { Modal } from './Dialogs';
-import { AlarmBadge, AlarmMeter, Badge, CardImg, EquipChips, GoalStatus, Piles, PoolView, TopBar, useGame } from './game';
+import { AlarmBadge, AlarmMeter, Badge, EquipChips, GoalStatus, Piles, PoolView, TopBar, useGame } from './game';
 import { useFlip } from './hooks';
-import { Icon, TypeIcon } from './icons';
+import { CardsIcon, Icon, TypeIcon } from './icons';
 import { Inspector, keyForTarget } from './Inspector';
 import { Rich } from './Rich';
 
@@ -31,7 +31,7 @@ export function PhoneLayout() {
         <PoolView />
         <EquipChips />
       </div>
-      <HandStrip />
+      <HandTiles />
       <footer className="pbar">
         <Piles />
         <span className="spacer" />
@@ -105,7 +105,7 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   const top = defOf(lc.id)?.top;
   const ability = sh.ability ?? c.ability;
   return (
-    <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''}`} onClick={() => select({ kind: 'line', slot })}>
+    <button data-flip={lc.id} data-tut="line-card" data-id={lc.id} className={`row ${last ? 'exit' : ''} ${can ? 'can' : ''} ${ability ? 'ab' : ''}`} onClick={() => select({ kind: 'line', slot })}>
       <span className="row-n">{slot + 1}</span>
       <span className="row-main">
         <span className="row-name">
@@ -144,21 +144,72 @@ function Row({ lc, slot }: { lc: LineCard; slot: number }) {
   );
 }
 
-function HandStrip() {
-  const { game, select } = useGame();
-  const { top } = useI18n();
+/** The hand as tiles: what each card gives, big enough to read on a phone. */
+function HandTiles() {
+  const { game } = useGame();
   const ref = useRef<HTMLDivElement>(null);
   useFlip(ref, true, game.hand);
   return (
-    <div className="hstrip" data-tut="hand" ref={ref} style={{ ['--n' as string]: Math.max(1, game.hand.length) }}>
-      {game.hand.map((id) => {
-        const pi = playInfo(game, id);
-        return (
-          <button key={id} data-flip={id} data-tut="hand-card" data-id={id} data-card={keyOf(id)} className={`hcard ${pi.canPlay || pi.canEquip ? 'can' : ''}`} onClick={() => select({ kind: 'hand', id })} aria-label={top(id)}>
-            <CardImg id={id} />
-          </button>
-        );
-      })}
+    <div className="htiles" data-tut="hand" ref={ref}>
+      {/* Seven cards or more: three columns of names, so a full hand still fits. */}
+      <div className={`ht-grid ${game.hand.length > 6 ? 'many' : ''}`}>
+        {game.hand.map((id) => (
+          <HandTile key={id} id={id} />
+        ))}
+      </div>
     </div>
   );
+}
+
+function HandTile({ id }: { id: string }) {
+  const { game, select } = useGame();
+  const { top, short } = useI18n();
+  const def = defOf(id);
+  if (!def) return null;
+  const pi = playInfo(game, id);
+  const name = top(id);
+  const text = short(id).effect;
+  return (
+    <button
+      data-flip={id}
+      data-tut="hand-card"
+      data-id={id}
+      data-card={keyOf(id)}
+      data-set={def.set}
+      className={`htile ${pi.canPlay || pi.canEquip ? 'can' : ''} ${text ? '' : 'solo'}`}
+      onClick={() => select({ kind: 'hand', id })}
+      aria-label={name}
+    >
+      <span className="ht-lead">
+        <TileLead id={id} />
+      </span>
+      <span className={`ht-name ${name.length > 14 ? 'long' : ''}`}>
+        <span className="ht-nm">{name}</span>
+        {def.top.keep && <span className="keep">KEEP</span>}
+      </span>
+      {text && (
+        <span className="ht-text">
+          <Rich text={text} size={14} />
+        </span>
+      )}
+    </button>
+  );
+}
+
+/** What a tile leads with: the resource it gives, the type an item pays for, or a draw/effect mark. */
+function TileLead({ id }: { id: string }) {
+  const { t } = useI18n();
+  const tp = defOf(id)!.top;
+  if (tp.res) return <Badge kind={tp.res[0]} n={tp.res[1]} size={30} label={`${tp.res[1]} ${t(`res.${tp.res[0]}`)}`} />;
+  if (tp.effect === 'flashy') return <Badge kind="f" n="X" size={30} label={t('res.f')} />;
+  if (tp.item) {
+    const type = ITEM_TARGET[tp.item];
+    return (
+      <span className="ht-type">
+        <TypeIcon type={type} label={t(`types.${type}`)} />
+      </span>
+    );
+  }
+  if (tp.effect?.startsWith('draw')) return <CardsIcon size={26} label={t('hud.cardsIcon')} />;
+  return <Icon name="bolt" size={22} />;
 }
